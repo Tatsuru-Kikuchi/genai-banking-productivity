@@ -1,0 +1,36 @@
+# =============================================================================
+# Requirements for GenAI Banking Productivity Analysis
+# =============================================================================
+# Install: pip install -r requirements.txt
+# =============================================================================
+
+# Data manipulation
+pandas>=1.5.0
+numpy>=1.21.0
+
+# Statistical analysis
+scipy>=1.9.0
+statsmodels>=0.13.0
+
+# Machine learning (for cosine similarity in W_network)
+scikit-learn>=1.1.0
+
+# Web scraping (SEC EDGAR)
+requests>=2.28.0
+beautifulsoup4>=4.11.0
+lxml>=4.9.0
+
+# Geographic data (for W_geo)
+pgeocode>=0.3.0
+
+# Visualization
+matplotlib>=3.5.0
+seaborn>=0.12.0
+
+# Optional: Network visualization
+# networkx>=2.8.0
+# pyvis>=0.3.0
+
+# Optional: Bayesian estimation
+# pymc>=5.0.0
+# arviz>=0.14.0

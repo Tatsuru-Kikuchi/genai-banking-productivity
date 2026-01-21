@@ -1,0 +1,545 @@
+bank,fiscal_year,ceo_name,ceo_birth_year,ceo_age,ceo_since,ceo_tenure
+JPMorgan Chase,2018,Jamie Dimon,1956,62,2005,13
+JPMorgan Chase,2019,Jamie Dimon,1956,63,2005,14
+JPMorgan Chase,2020,Jamie Dimon,1956,64,2005,15
+JPMorgan Chase,2021,Jamie Dimon,1956,65,2005,16
+JPMorgan Chase,2022,Jamie Dimon,1956,66,2005,17
+JPMorgan Chase,2023,Jamie Dimon,1956,67,2005,18
+JPMorgan Chase,2024,Jamie Dimon,1956,68,2005,19
+JPMorgan Chase,2025,Jamie Dimon,1956,69,2005,20
+Bank of America,2018,Brian Moynihan,1959,59,2010,8
+Bank of America,2019,Brian Moynihan,1959,60,2010,9
+Bank of America,2020,Brian Moynihan,1959,61,2010,10
+Bank of America,2021,Brian Moynihan,1959,62,2010,11
+Bank of America,2022,Brian Moynihan,1959,63,2010,12
+Bank of America,2023,Brian Moynihan,1959,64,2010,13
+Bank of America,2024,Brian Moynihan,1959,65,2010,14
+Bank of America,2025,Brian Moynihan,1959,66,2010,15
+Citigroup,2018,Jane Fraser,1967,51,2021,0
+Citigroup,2019,Jane Fraser,1967,52,2021,0
+Citigroup,2020,Jane Fraser,1967,53,2021,0
+Citigroup,2021,Jane Fraser,1967,54,2021,0
+Citigroup,2022,Jane Fraser,1967,55,2021,1
+Citigroup,2023,Jane Fraser,1967,56,2021,2
+Citigroup,2024,Jane Fraser,1967,57,2021,3
+Citigroup,2025,Jane Fraser,1967,58,2021,4
+Wells Fargo,2018,Charlie Scharf,1965,53,2019,0
+Wells Fargo,2019,Charlie Scharf,1965,54,2019,0
+Wells Fargo,2020,Charlie Scharf,1965,55,2019,1
+Wells Fargo,2021,Charlie Scharf,1965,56,2019,2
+Wells Fargo,2022,Charlie Scharf,1965,57,2019,3
+Wells Fargo,2023,Charlie Scharf,1965,58,2019,4
+Wells Fargo,2024,Charlie Scharf,1965,59,2019,5
+Wells Fargo,2025,Charlie Scharf,1965,60,2019,6
+Goldman Sachs,2018,David Solomon,1962,56,2018,0
+Goldman Sachs,2019,David Solomon,1962,57,2018,1
+Goldman Sachs,2020,David Solomon,1962,58,2018,2
+Goldman Sachs,2021,David Solomon,1962,59,2018,3
+Goldman Sachs,2022,David Solomon,1962,60,2018,4
+Goldman Sachs,2023,David Solomon,1962,61,2018,5
+Goldman Sachs,2024,David Solomon,1962,62,2018,6
+Goldman Sachs,2025,David Solomon,1962,63,2018,7
+Morgan Stanley,2018,Ted Pick,1969,49,2024,0
+Morgan Stanley,2019,Ted Pick,1969,50,2024,0
+Morgan Stanley,2020,Ted Pick,1969,51,2024,0
+Morgan Stanley,2021,Ted Pick,1969,52,2024,0
+Morgan Stanley,2022,Ted Pick,1969,53,2024,0
+Morgan Stanley,2023,Ted Pick,1969,54,2024,0
+Morgan Stanley,2024,Ted Pick,1969,55,2024,0
+Morgan Stanley,2025,Ted Pick,1969,56,2024,1
+Bank of New York Mellon,2018,Robin Vince,1969,49,2022,0
+Bank of New York Mellon,2019,Robin Vince,1969,50,2022,0
+Bank of New York Mellon,2020,Robin Vince,1969,51,2022,0
+Bank of New York Mellon,2021,Robin Vince,1969,52,2022,0
+Bank of New York Mellon,2022,Robin Vince,1969,53,2022,0
+Bank of New York Mellon,2023,Robin Vince,1969,54,2022,1
+Bank of New York Mellon,2024,Robin Vince,1969,55,2022,2
+Bank of New York Mellon,2025,Robin Vince,1969,56,2022,3
+State Street,2018,Ronald O'Hanley,1957,61,2019,0
+State Street,2019,Ronald O'Hanley,1957,62,2019,0
+State Street,2020,Ronald O'Hanley,1957,63,2019,1
+State Street,2021,Ronald O'Hanley,1957,64,2019,2
+State Street,2022,Ronald O'Hanley,1957,65,2019,3
+State Street,2023,Ronald O'Hanley,1957,66,2019,4
+State Street,2024,Ronald O'Hanley,1957,67,2019,5
+State Street,2025,Ronald O'Hanley,1957,68,2019,6
+US Bancorp,2018,Andy Cecere,1960,58,2017,1
+US Bancorp,2019,Andy Cecere,1960,59,2017,2
+US Bancorp,2020,Andy Cecere,1960,60,2017,3
+US Bancorp,2021,Andy Cecere,1960,61,2017,4
+US Bancorp,2022,Andy Cecere,1960,62,2017,5
+US Bancorp,2023,Andy Cecere,1960,63,2017,6
+US Bancorp,2024,Andy Cecere,1960,64,2017,7
+US Bancorp,2025,Andy Cecere,1960,65,2017,8
+PNC Financial,2018,William Demchak,1962,56,2013,5
+PNC Financial,2019,William Demchak,1962,57,2013,6
+PNC Financial,2020,William Demchak,1962,58,2013,7
+PNC Financial,2021,William Demchak,1962,59,2013,8
+PNC Financial,2022,William Demchak,1962,60,2013,9
+PNC Financial,2023,William Demchak,1962,61,2013,10
+PNC Financial,2024,William Demchak,1962,62,2013,11
+PNC Financial,2025,William Demchak,1962,63,2013,12
+Truist Financial,2018,Bill Rogers,1958,60,2021,0
+Truist Financial,2019,Bill Rogers,1958,61,2021,0
+Truist Financial,2020,Bill Rogers,1958,62,2021,0
+Truist Financial,2021,Bill Rogers,1958,63,2021,0
+Truist Financial,2022,Bill Rogers,1958,64,2021,1
+Truist Financial,2023,Bill Rogers,1958,65,2021,2
+Truist Financial,2024,Bill Rogers,1958,66,2021,3
+Truist Financial,2025,Bill Rogers,1958,67,2021,4
+Capital One,2018,Richard Fairbank,1950,68,1994,24
+Capital One,2019,Richard Fairbank,1950,69,1994,25
+Capital One,2020,Richard Fairbank,1950,70,1994,26
+Capital One,2021,Richard Fairbank,1950,71,1994,27
+Capital One,2022,Richard Fairbank,1950,72,1994,28
+Capital One,2023,Richard Fairbank,1950,73,1994,29
+Capital One,2024,Richard Fairbank,1950,74,1994,30
+Capital One,2025,Richard Fairbank,1950,75,1994,31
+Fifth Third Bancorp,2018,Tim Spence,1978,40,2022,0
+Fifth Third Bancorp,2019,Tim Spence,1978,41,2022,0
+Fifth Third Bancorp,2020,Tim Spence,1978,42,2022,0
+Fifth Third Bancorp,2021,Tim Spence,1978,43,2022,0
+Fifth Third Bancorp,2022,Tim Spence,1978,44,2022,0
+Fifth Third Bancorp,2023,Tim Spence,1978,45,2022,1
+Fifth Third Bancorp,2024,Tim Spence,1978,46,2022,2
+Fifth Third Bancorp,2025,Tim Spence,1978,47,2022,3
+KeyCorp,2018,Chris Gorman,1962,56,2020,0
+KeyCorp,2019,Chris Gorman,1962,57,2020,0
+KeyCorp,2020,Chris Gorman,1962,58,2020,0
+KeyCorp,2021,Chris Gorman,1962,59,2020,1
+KeyCorp,2022,Chris Gorman,1962,60,2020,2
+KeyCorp,2023,Chris Gorman,1962,61,2020,3
+KeyCorp,2024,Chris Gorman,1962,62,2020,4
+KeyCorp,2025,Chris Gorman,1962,63,2020,5
+Huntington Bancshares,2018,Steve Steinour,1958,60,2009,9
+Huntington Bancshares,2019,Steve Steinour,1958,61,2009,10
+Huntington Bancshares,2020,Steve Steinour,1958,62,2009,11
+Huntington Bancshares,2021,Steve Steinour,1958,63,2009,12
+Huntington Bancshares,2022,Steve Steinour,1958,64,2009,13
+Huntington Bancshares,2023,Steve Steinour,1958,65,2009,14
+Huntington Bancshares,2024,Steve Steinour,1958,66,2009,15
+Huntington Bancshares,2025,Steve Steinour,1958,67,2009,16
+M&T Bank,2018,Rene Jones,1964,54,2017,1
+M&T Bank,2019,Rene Jones,1964,55,2017,2
+M&T Bank,2020,Rene Jones,1964,56,2017,3
+M&T Bank,2021,Rene Jones,1964,57,2017,4
+M&T Bank,2022,Rene Jones,1964,58,2017,5
+M&T Bank,2023,Rene Jones,1964,59,2017,6
+M&T Bank,2024,Rene Jones,1964,60,2017,7
+M&T Bank,2025,Rene Jones,1964,61,2017,8
+Regions Financial,2018,John Turner,1962,56,2018,0
+Regions Financial,2019,John Turner,1962,57,2018,1
+Regions Financial,2020,John Turner,1962,58,2018,2
+Regions Financial,2021,John Turner,1962,59,2018,3
+Regions Financial,2022,John Turner,1962,60,2018,4
+Regions Financial,2023,John Turner,1962,61,2018,5
+Regions Financial,2024,John Turner,1962,62,2018,6
+Regions Financial,2025,John Turner,1962,63,2018,7
+Northern Trust,2018,Michael O'Grady,1960,58,2018,0
+Northern Trust,2019,Michael O'Grady,1960,59,2018,1
+Northern Trust,2020,Michael O'Grady,1960,60,2018,2
+Northern Trust,2021,Michael O'Grady,1960,61,2018,3
+Northern Trust,2022,Michael O'Grady,1960,62,2018,4
+Northern Trust,2023,Michael O'Grady,1960,63,2018,5
+Northern Trust,2024,Michael O'Grady,1960,64,2018,6
+Northern Trust,2025,Michael O'Grady,1960,65,2018,7
+Citizens Financial,2018,Bruce Van Saun,1957,61,2013,5
+Citizens Financial,2019,Bruce Van Saun,1957,62,2013,6
+Citizens Financial,2020,Bruce Van Saun,1957,63,2013,7
+Citizens Financial,2021,Bruce Van Saun,1957,64,2013,8
+Citizens Financial,2022,Bruce Van Saun,1957,65,2013,9
+Citizens Financial,2023,Bruce Van Saun,1957,66,2013,10
+Citizens Financial,2024,Bruce Van Saun,1957,67,2013,11
+Citizens Financial,2025,Bruce Van Saun,1957,68,2013,12
+First Citizens BancShares,2018,Frank Holding Jr,1962,56,2008,10
+First Citizens BancShares,2019,Frank Holding Jr,1962,57,2008,11
+First Citizens BancShares,2020,Frank Holding Jr,1962,58,2008,12
+First Citizens BancShares,2021,Frank Holding Jr,1962,59,2008,13
+First Citizens BancShares,2022,Frank Holding Jr,1962,60,2008,14
+First Citizens BancShares,2023,Frank Holding Jr,1962,61,2008,15
+First Citizens BancShares,2024,Frank Holding Jr,1962,62,2008,16
+First Citizens BancShares,2025,Frank Holding Jr,1962,63,2008,17
+Comerica,2018,Curt Farmer,1962,56,2019,0
+Comerica,2019,Curt Farmer,1962,57,2019,0
+Comerica,2020,Curt Farmer,1962,58,2019,1
+Comerica,2021,Curt Farmer,1962,59,2019,2
+Comerica,2022,Curt Farmer,1962,60,2019,3
+Comerica,2023,Curt Farmer,1962,61,2019,4
+Comerica,2024,Curt Farmer,1962,62,2019,5
+Comerica,2025,Curt Farmer,1962,63,2019,6
+Zions Bancorp,2018,Harris Simmons,1954,64,2007,11
+Zions Bancorp,2019,Harris Simmons,1954,65,2007,12
+Zions Bancorp,2020,Harris Simmons,1954,66,2007,13
+Zions Bancorp,2021,Harris Simmons,1954,67,2007,14
+Zions Bancorp,2022,Harris Simmons,1954,68,2007,15
+Zions Bancorp,2023,Harris Simmons,1954,69,2007,16
+Zions Bancorp,2024,Harris Simmons,1954,70,2007,17
+Zions Bancorp,2025,Harris Simmons,1954,71,2007,18
+East West Bancorp,2018,Dominic Ng,1959,59,2011,7
+East West Bancorp,2019,Dominic Ng,1959,60,2011,8
+East West Bancorp,2020,Dominic Ng,1959,61,2011,9
+East West Bancorp,2021,Dominic Ng,1959,62,2011,10
+East West Bancorp,2022,Dominic Ng,1959,63,2011,11
+East West Bancorp,2023,Dominic Ng,1959,64,2011,12
+East West Bancorp,2024,Dominic Ng,1959,65,2011,13
+East West Bancorp,2025,Dominic Ng,1959,66,2011,14
+Western Alliance,2018,Kenneth Vecchione,1956,62,2018,0
+Western Alliance,2019,Kenneth Vecchione,1956,63,2018,1
+Western Alliance,2020,Kenneth Vecchione,1956,64,2018,2
+Western Alliance,2021,Kenneth Vecchione,1956,65,2018,3
+Western Alliance,2022,Kenneth Vecchione,1956,66,2018,4
+Western Alliance,2023,Kenneth Vecchione,1956,67,2018,5
+Western Alliance,2024,Kenneth Vecchione,1956,68,2018,6
+Western Alliance,2025,Kenneth Vecchione,1956,69,2018,7
+Columbia Banking System,2018,Clint Stein,1968,50,2017,1
+Columbia Banking System,2019,Clint Stein,1968,51,2017,2
+Columbia Banking System,2020,Clint Stein,1968,52,2017,3
+Columbia Banking System,2021,Clint Stein,1968,53,2017,4
+Columbia Banking System,2022,Clint Stein,1968,54,2017,5
+Columbia Banking System,2023,Clint Stein,1968,55,2017,6
+Columbia Banking System,2024,Clint Stein,1968,56,2017,7
+Columbia Banking System,2025,Clint Stein,1968,57,2017,8
+Pinnacle Financial,2018,Terry Turner,1960,58,2000,18
+Pinnacle Financial,2019,Terry Turner,1960,59,2000,19
+Pinnacle Financial,2020,Terry Turner,1960,60,2000,20
+Pinnacle Financial,2021,Terry Turner,1960,61,2000,21
+Pinnacle Financial,2022,Terry Turner,1960,62,2000,22
+Pinnacle Financial,2023,Terry Turner,1960,63,2000,23
+Pinnacle Financial,2024,Terry Turner,1960,64,2000,24
+Pinnacle Financial,2025,Terry Turner,1960,65,2000,25
+BOK Financial,2018,Stacy Kymes,1971,47,2022,0
+BOK Financial,2019,Stacy Kymes,1971,48,2022,0
+BOK Financial,2020,Stacy Kymes,1971,49,2022,0
+BOK Financial,2021,Stacy Kymes,1971,50,2022,0
+BOK Financial,2022,Stacy Kymes,1971,51,2022,0
+BOK Financial,2023,Stacy Kymes,1971,52,2022,1
+BOK Financial,2024,Stacy Kymes,1971,53,2022,2
+BOK Financial,2025,Stacy Kymes,1971,54,2022,3
+Cullen Frost Bankers,2018,Phil Green,1959,59,2016,2
+Cullen Frost Bankers,2019,Phil Green,1959,60,2016,3
+Cullen Frost Bankers,2020,Phil Green,1959,61,2016,4
+Cullen Frost Bankers,2021,Phil Green,1959,62,2016,5
+Cullen Frost Bankers,2022,Phil Green,1959,63,2016,6
+Cullen Frost Bankers,2023,Phil Green,1959,64,2016,7
+Cullen Frost Bankers,2024,Phil Green,1959,65,2016,8
+Cullen Frost Bankers,2025,Phil Green,1959,66,2016,9
+Synovus Financial,2018,Kevin Blair,1966,52,2021,0
+Synovus Financial,2019,Kevin Blair,1966,53,2021,0
+Synovus Financial,2020,Kevin Blair,1966,54,2021,0
+Synovus Financial,2021,Kevin Blair,1966,55,2021,0
+Synovus Financial,2022,Kevin Blair,1966,56,2021,1
+Synovus Financial,2023,Kevin Blair,1966,57,2021,2
+Synovus Financial,2024,Kevin Blair,1966,58,2021,3
+Synovus Financial,2025,Kevin Blair,1966,59,2021,4
+Texas Capital Bancshares,2018,Rob Holmes,1965,53,2021,0
+Texas Capital Bancshares,2019,Rob Holmes,1965,54,2021,0
+Texas Capital Bancshares,2020,Rob Holmes,1965,55,2021,0
+Texas Capital Bancshares,2021,Rob Holmes,1965,56,2021,0
+Texas Capital Bancshares,2022,Rob Holmes,1965,57,2021,1
+Texas Capital Bancshares,2023,Rob Holmes,1965,58,2021,2
+Texas Capital Bancshares,2024,Rob Holmes,1965,59,2021,3
+Texas Capital Bancshares,2025,Rob Holmes,1965,60,2021,4
+Valley National Bancorp,2018,Ira Robbins,1972,46,2018,0
+Valley National Bancorp,2019,Ira Robbins,1972,47,2018,1
+Valley National Bancorp,2020,Ira Robbins,1972,48,2018,2
+Valley National Bancorp,2021,Ira Robbins,1972,49,2018,3
+Valley National Bancorp,2022,Ira Robbins,1972,50,2018,4
+Valley National Bancorp,2023,Ira Robbins,1972,51,2018,5
+Valley National Bancorp,2024,Ira Robbins,1972,52,2018,6
+Valley National Bancorp,2025,Ira Robbins,1972,53,2018,7
+Wintrust Financial,2018,Tim Crane,1962,56,2018,0
+Wintrust Financial,2019,Tim Crane,1962,57,2018,1
+Wintrust Financial,2020,Tim Crane,1962,58,2018,2
+Wintrust Financial,2021,Tim Crane,1962,59,2018,3
+Wintrust Financial,2022,Tim Crane,1962,60,2018,4
+Wintrust Financial,2023,Tim Crane,1962,61,2018,5
+Wintrust Financial,2024,Tim Crane,1962,62,2018,6
+Wintrust Financial,2025,Tim Crane,1962,63,2018,7
+Webster Financial,2018,John Ciulla,1967,51,2020,0
+Webster Financial,2019,John Ciulla,1967,52,2020,0
+Webster Financial,2020,John Ciulla,1967,53,2020,0
+Webster Financial,2021,John Ciulla,1967,54,2020,1
+Webster Financial,2022,John Ciulla,1967,55,2020,2
+Webster Financial,2023,John Ciulla,1967,56,2020,3
+Webster Financial,2024,John Ciulla,1967,57,2020,4
+Webster Financial,2025,John Ciulla,1967,58,2020,5
+UMB Financial,2018,Mariner Kemper,1972,46,2004,14
+UMB Financial,2019,Mariner Kemper,1972,47,2004,15
+UMB Financial,2020,Mariner Kemper,1972,48,2004,16
+UMB Financial,2021,Mariner Kemper,1972,49,2004,17
+UMB Financial,2022,Mariner Kemper,1972,50,2004,18
+UMB Financial,2023,Mariner Kemper,1972,51,2004,19
+UMB Financial,2024,Mariner Kemper,1972,52,2004,20
+UMB Financial,2025,Mariner Kemper,1972,53,2004,21
+First Horizon,2018,Bryan Jordan,1961,57,2008,10
+First Horizon,2019,Bryan Jordan,1961,58,2008,11
+First Horizon,2020,Bryan Jordan,1961,59,2008,12
+First Horizon,2021,Bryan Jordan,1961,60,2008,13
+First Horizon,2022,Bryan Jordan,1961,61,2008,14
+First Horizon,2023,Bryan Jordan,1961,62,2008,15
+First Horizon,2024,Bryan Jordan,1961,63,2008,16
+First Horizon,2025,Bryan Jordan,1961,64,2008,17
+Prosperity Bancshares,2018,David Zalman,1954,64,1986,32
+Prosperity Bancshares,2019,David Zalman,1954,65,1986,33
+Prosperity Bancshares,2020,David Zalman,1954,66,1986,34
+Prosperity Bancshares,2021,David Zalman,1954,67,1986,35
+Prosperity Bancshares,2022,David Zalman,1954,68,1986,36
+Prosperity Bancshares,2023,David Zalman,1954,69,1986,37
+Prosperity Bancshares,2024,David Zalman,1954,70,1986,38
+Prosperity Bancshares,2025,David Zalman,1954,71,1986,39
+FNB Corp,2018,Vincent Delie Jr,1962,56,2012,6
+FNB Corp,2019,Vincent Delie Jr,1962,57,2012,7
+FNB Corp,2020,Vincent Delie Jr,1962,58,2012,8
+FNB Corp,2021,Vincent Delie Jr,1962,59,2012,9
+FNB Corp,2022,Vincent Delie Jr,1962,60,2012,10
+FNB Corp,2023,Vincent Delie Jr,1962,61,2012,11
+FNB Corp,2024,Vincent Delie Jr,1962,62,2012,12
+FNB Corp,2025,Vincent Delie Jr,1962,63,2012,13
+American Express,2018,Stephen Squeri,1959,59,2018,0
+American Express,2019,Stephen Squeri,1959,60,2018,1
+American Express,2020,Stephen Squeri,1959,61,2018,2
+American Express,2021,Stephen Squeri,1959,62,2018,3
+American Express,2022,Stephen Squeri,1959,63,2018,4
+American Express,2023,Stephen Squeri,1959,64,2018,5
+American Express,2024,Stephen Squeri,1959,65,2018,6
+American Express,2025,Stephen Squeri,1959,66,2018,7
+Discover Financial,2018,John Owen,1965,53,2023,0
+Discover Financial,2019,John Owen,1965,54,2023,0
+Discover Financial,2020,John Owen,1965,55,2023,0
+Discover Financial,2021,John Owen,1965,56,2023,0
+Discover Financial,2022,John Owen,1965,57,2023,0
+Discover Financial,2023,John Owen,1965,58,2023,0
+Discover Financial,2024,John Owen,1965,59,2023,1
+Discover Financial,2025,John Owen,1965,60,2023,2
+Visa,2018,Ryan McInerney,1969,49,2023,0
+Visa,2019,Ryan McInerney,1969,50,2023,0
+Visa,2020,Ryan McInerney,1969,51,2023,0
+Visa,2021,Ryan McInerney,1969,52,2023,0
+Visa,2022,Ryan McInerney,1969,53,2023,0
+Visa,2023,Ryan McInerney,1969,54,2023,0
+Visa,2024,Ryan McInerney,1969,55,2023,1
+Visa,2025,Ryan McInerney,1969,56,2023,2
+Mastercard,2018,Michael Miebach,1967,51,2021,0
+Mastercard,2019,Michael Miebach,1967,52,2021,0
+Mastercard,2020,Michael Miebach,1967,53,2021,0
+Mastercard,2021,Michael Miebach,1967,54,2021,0
+Mastercard,2022,Michael Miebach,1967,55,2021,1
+Mastercard,2023,Michael Miebach,1967,56,2021,2
+Mastercard,2024,Michael Miebach,1967,57,2021,3
+Mastercard,2025,Michael Miebach,1967,58,2021,4
+PayPal,2018,Alex Chriss,1980,38,2023,0
+PayPal,2019,Alex Chriss,1980,39,2023,0
+PayPal,2020,Alex Chriss,1980,40,2023,0
+PayPal,2021,Alex Chriss,1980,41,2023,0
+PayPal,2022,Alex Chriss,1980,42,2023,0
+PayPal,2023,Alex Chriss,1980,43,2023,0
+PayPal,2024,Alex Chriss,1980,44,2023,1
+PayPal,2025,Alex Chriss,1980,45,2023,2
+Charles Schwab,2018,Walt Bettinger,1961,57,2008,10
+Charles Schwab,2019,Walt Bettinger,1961,58,2008,11
+Charles Schwab,2020,Walt Bettinger,1961,59,2008,12
+Charles Schwab,2021,Walt Bettinger,1961,60,2008,13
+Charles Schwab,2022,Walt Bettinger,1961,61,2008,14
+Charles Schwab,2023,Walt Bettinger,1961,62,2008,15
+Charles Schwab,2024,Walt Bettinger,1961,63,2008,16
+Charles Schwab,2025,Walt Bettinger,1961,64,2008,17
+Synchrony Financial,2018,Brian Doubles,1972,46,2021,0
+Synchrony Financial,2019,Brian Doubles,1972,47,2021,0
+Synchrony Financial,2020,Brian Doubles,1972,48,2021,0
+Synchrony Financial,2021,Brian Doubles,1972,49,2021,0
+Synchrony Financial,2022,Brian Doubles,1972,50,2021,1
+Synchrony Financial,2023,Brian Doubles,1972,51,2021,2
+Synchrony Financial,2024,Brian Doubles,1972,52,2021,3
+Synchrony Financial,2025,Brian Doubles,1972,53,2021,4
+Ally Financial,2018,Jeffrey Brown,1968,50,2015,3
+Ally Financial,2019,Jeffrey Brown,1968,51,2015,4
+Ally Financial,2020,Jeffrey Brown,1968,52,2015,5
+Ally Financial,2021,Jeffrey Brown,1968,53,2015,6
+Ally Financial,2022,Jeffrey Brown,1968,54,2015,7
+Ally Financial,2023,Jeffrey Brown,1968,55,2015,8
+Ally Financial,2024,Jeffrey Brown,1968,56,2015,9
+Ally Financial,2025,Jeffrey Brown,1968,57,2015,10
+HSBC Holdings,2018,Noel Quinn,1963,55,2020,0
+HSBC Holdings,2019,Noel Quinn,1963,56,2020,0
+HSBC Holdings,2020,Noel Quinn,1963,57,2020,0
+HSBC Holdings,2021,Noel Quinn,1963,58,2020,1
+HSBC Holdings,2022,Noel Quinn,1963,59,2020,2
+HSBC Holdings,2023,Noel Quinn,1963,60,2020,3
+HSBC Holdings,2024,Noel Quinn,1963,61,2020,4
+HSBC Holdings,2025,Noel Quinn,1963,62,2020,5
+Barclays,2018,C.S. Venkatakrishnan,1965,53,2021,0
+Barclays,2019,C.S. Venkatakrishnan,1965,54,2021,0
+Barclays,2020,C.S. Venkatakrishnan,1965,55,2021,0
+Barclays,2021,C.S. Venkatakrishnan,1965,56,2021,0
+Barclays,2022,C.S. Venkatakrishnan,1965,57,2021,1
+Barclays,2023,C.S. Venkatakrishnan,1965,58,2021,2
+Barclays,2024,C.S. Venkatakrishnan,1965,59,2021,3
+Barclays,2025,C.S. Venkatakrishnan,1965,60,2021,4
+Lloyds Banking,2018,Charlie Nunn,1971,47,2021,0
+Lloyds Banking,2019,Charlie Nunn,1971,48,2021,0
+Lloyds Banking,2020,Charlie Nunn,1971,49,2021,0
+Lloyds Banking,2021,Charlie Nunn,1971,50,2021,0
+Lloyds Banking,2022,Charlie Nunn,1971,51,2021,1
+Lloyds Banking,2023,Charlie Nunn,1971,52,2021,2
+Lloyds Banking,2024,Charlie Nunn,1971,53,2021,3
+Lloyds Banking,2025,Charlie Nunn,1971,54,2021,4
+NatWest Group,2018,Paul Thwaite,1969,49,2024,0
+NatWest Group,2019,Paul Thwaite,1969,50,2024,0
+NatWest Group,2020,Paul Thwaite,1969,51,2024,0
+NatWest Group,2021,Paul Thwaite,1969,52,2024,0
+NatWest Group,2022,Paul Thwaite,1969,53,2024,0
+NatWest Group,2023,Paul Thwaite,1969,54,2024,0
+NatWest Group,2024,Paul Thwaite,1969,55,2024,0
+NatWest Group,2025,Paul Thwaite,1969,56,2024,1
+Standard Chartered,2018,Bill Winters,1962,56,2015,3
+Standard Chartered,2019,Bill Winters,1962,57,2015,4
+Standard Chartered,2020,Bill Winters,1962,58,2015,5
+Standard Chartered,2021,Bill Winters,1962,59,2015,6
+Standard Chartered,2022,Bill Winters,1962,60,2015,7
+Standard Chartered,2023,Bill Winters,1962,61,2015,8
+Standard Chartered,2024,Bill Winters,1962,62,2015,9
+Standard Chartered,2025,Bill Winters,1962,63,2015,10
+Royal Bank of Canada,2018,Dave McKay,1963,55,2014,4
+Royal Bank of Canada,2019,Dave McKay,1963,56,2014,5
+Royal Bank of Canada,2020,Dave McKay,1963,57,2014,6
+Royal Bank of Canada,2021,Dave McKay,1963,58,2014,7
+Royal Bank of Canada,2022,Dave McKay,1963,59,2014,8
+Royal Bank of Canada,2023,Dave McKay,1963,60,2014,9
+Royal Bank of Canada,2024,Dave McKay,1963,61,2014,10
+Royal Bank of Canada,2025,Dave McKay,1963,62,2014,11
+Toronto-Dominion Bank,2018,Bharat Masrani,1956,62,2014,4
+Toronto-Dominion Bank,2019,Bharat Masrani,1956,63,2014,5
+Toronto-Dominion Bank,2020,Bharat Masrani,1956,64,2014,6
+Toronto-Dominion Bank,2021,Bharat Masrani,1956,65,2014,7
+Toronto-Dominion Bank,2022,Bharat Masrani,1956,66,2014,8
+Toronto-Dominion Bank,2023,Bharat Masrani,1956,67,2014,9
+Toronto-Dominion Bank,2024,Bharat Masrani,1956,68,2014,10
+Toronto-Dominion Bank,2025,Bharat Masrani,1956,69,2014,11
+Bank of Nova Scotia,2018,Scott Thomson,1968,50,2023,0
+Bank of Nova Scotia,2019,Scott Thomson,1968,51,2023,0
+Bank of Nova Scotia,2020,Scott Thomson,1968,52,2023,0
+Bank of Nova Scotia,2021,Scott Thomson,1968,53,2023,0
+Bank of Nova Scotia,2022,Scott Thomson,1968,54,2023,0
+Bank of Nova Scotia,2023,Scott Thomson,1968,55,2023,0
+Bank of Nova Scotia,2024,Scott Thomson,1968,56,2023,1
+Bank of Nova Scotia,2025,Scott Thomson,1968,57,2023,2
+Bank of Montreal,2018,Darryl White,1970,48,2017,1
+Bank of Montreal,2019,Darryl White,1970,49,2017,2
+Bank of Montreal,2020,Darryl White,1970,50,2017,3
+Bank of Montreal,2021,Darryl White,1970,51,2017,4
+Bank of Montreal,2022,Darryl White,1970,52,2017,5
+Bank of Montreal,2023,Darryl White,1970,53,2017,6
+Bank of Montreal,2024,Darryl White,1970,54,2017,7
+Bank of Montreal,2025,Darryl White,1970,55,2017,8
+Canadian Imperial Bank,2018,Victor Dodig,1966,52,2014,4
+Canadian Imperial Bank,2019,Victor Dodig,1966,53,2014,5
+Canadian Imperial Bank,2020,Victor Dodig,1966,54,2014,6
+Canadian Imperial Bank,2021,Victor Dodig,1966,55,2014,7
+Canadian Imperial Bank,2022,Victor Dodig,1966,56,2014,8
+Canadian Imperial Bank,2023,Victor Dodig,1966,57,2014,9
+Canadian Imperial Bank,2024,Victor Dodig,1966,58,2014,10
+Canadian Imperial Bank,2025,Victor Dodig,1966,59,2014,11
+UBS Group,2018,Sergio Ermotti,1960,58,2023,0
+UBS Group,2019,Sergio Ermotti,1960,59,2023,0
+UBS Group,2020,Sergio Ermotti,1960,60,2023,0
+UBS Group,2021,Sergio Ermotti,1960,61,2023,0
+UBS Group,2022,Sergio Ermotti,1960,62,2023,0
+UBS Group,2023,Sergio Ermotti,1960,63,2023,0
+UBS Group,2024,Sergio Ermotti,1960,64,2023,1
+UBS Group,2025,Sergio Ermotti,1960,65,2023,2
+Credit Suisse,2018,Ulrich Koerner,1962,56,2022,0
+Credit Suisse,2019,Ulrich Koerner,1962,57,2022,0
+Credit Suisse,2020,Ulrich Koerner,1962,58,2022,0
+Credit Suisse,2021,Ulrich Koerner,1962,59,2022,0
+Credit Suisse,2022,Ulrich Koerner,1962,60,2022,0
+Credit Suisse,2023,Ulrich Koerner,1962,61,2022,1
+Credit Suisse,2024,Ulrich Koerner,1962,62,2022,2
+Credit Suisse,2025,Ulrich Koerner,1962,63,2022,3
+Deutsche Bank,2018,Christian Sewing,1970,48,2018,0
+Deutsche Bank,2019,Christian Sewing,1970,49,2018,1
+Deutsche Bank,2020,Christian Sewing,1970,50,2018,2
+Deutsche Bank,2021,Christian Sewing,1970,51,2018,3
+Deutsche Bank,2022,Christian Sewing,1970,52,2018,4
+Deutsche Bank,2023,Christian Sewing,1970,53,2018,5
+Deutsche Bank,2024,Christian Sewing,1970,54,2018,6
+Deutsche Bank,2025,Christian Sewing,1970,55,2018,7
+ING Group,2018,Steven van Rijswijk,1969,49,2020,0
+ING Group,2019,Steven van Rijswijk,1969,50,2020,0
+ING Group,2020,Steven van Rijswijk,1969,51,2020,0
+ING Group,2021,Steven van Rijswijk,1969,52,2020,1
+ING Group,2022,Steven van Rijswijk,1969,53,2020,2
+ING Group,2023,Steven van Rijswijk,1969,54,2020,3
+ING Group,2024,Steven van Rijswijk,1969,55,2020,4
+ING Group,2025,Steven van Rijswijk,1969,56,2020,5
+BBVA,2018,Onur Genc,1974,44,2019,0
+BBVA,2019,Onur Genc,1974,45,2019,0
+BBVA,2020,Onur Genc,1974,46,2019,1
+BBVA,2021,Onur Genc,1974,47,2019,2
+BBVA,2022,Onur Genc,1974,48,2019,3
+BBVA,2023,Onur Genc,1974,49,2019,4
+BBVA,2024,Onur Genc,1974,50,2019,5
+BBVA,2025,Onur Genc,1974,51,2019,6
+Mitsubishi UFJ Financial,2018,Hironori Kamezawa,1963,55,2021,0
+Mitsubishi UFJ Financial,2019,Hironori Kamezawa,1963,56,2021,0
+Mitsubishi UFJ Financial,2020,Hironori Kamezawa,1963,57,2021,0
+Mitsubishi UFJ Financial,2021,Hironori Kamezawa,1963,58,2021,0
+Mitsubishi UFJ Financial,2022,Hironori Kamezawa,1963,59,2021,1
+Mitsubishi UFJ Financial,2023,Hironori Kamezawa,1963,60,2021,2
+Mitsubishi UFJ Financial,2024,Hironori Kamezawa,1963,61,2021,3
+Mitsubishi UFJ Financial,2025,Hironori Kamezawa,1963,62,2021,4
+Mizuho Financial,2018,Masahiro Kihara,1963,55,2022,0
+Mizuho Financial,2019,Masahiro Kihara,1963,56,2022,0
+Mizuho Financial,2020,Masahiro Kihara,1963,57,2022,0
+Mizuho Financial,2021,Masahiro Kihara,1963,58,2022,0
+Mizuho Financial,2022,Masahiro Kihara,1963,59,2022,0
+Mizuho Financial,2023,Masahiro Kihara,1963,60,2022,1
+Mizuho Financial,2024,Masahiro Kihara,1963,61,2022,2
+Mizuho Financial,2025,Masahiro Kihara,1963,62,2022,3
+Sumitomo Mitsui Financial,2018,Jun Ohta,1963,55,2022,0
+Sumitomo Mitsui Financial,2019,Jun Ohta,1963,56,2022,0
+Sumitomo Mitsui Financial,2020,Jun Ohta,1963,57,2022,0
+Sumitomo Mitsui Financial,2021,Jun Ohta,1963,58,2022,0
+Sumitomo Mitsui Financial,2022,Jun Ohta,1963,59,2022,0
+Sumitomo Mitsui Financial,2023,Jun Ohta,1963,60,2022,1
+Sumitomo Mitsui Financial,2024,Jun Ohta,1963,61,2022,2
+Sumitomo Mitsui Financial,2025,Jun Ohta,1963,62,2022,3
+DBS Group,2018,Piyush Gupta,1959,59,2009,9
+DBS Group,2019,Piyush Gupta,1959,60,2009,10
+DBS Group,2020,Piyush Gupta,1959,61,2009,11
+DBS Group,2021,Piyush Gupta,1959,62,2009,12
+DBS Group,2022,Piyush Gupta,1959,63,2009,13
+DBS Group,2023,Piyush Gupta,1959,64,2009,14
+DBS Group,2024,Piyush Gupta,1959,65,2009,15
+DBS Group,2025,Piyush Gupta,1959,66,2009,16
+Itau Unibanco,2018,Milton Maluhy Filho,1975,43,2021,0
+Itau Unibanco,2019,Milton Maluhy Filho,1975,44,2021,0
+Itau Unibanco,2020,Milton Maluhy Filho,1975,45,2021,0
+Itau Unibanco,2021,Milton Maluhy Filho,1975,46,2021,0
+Itau Unibanco,2022,Milton Maluhy Filho,1975,47,2021,1
+Itau Unibanco,2023,Milton Maluhy Filho,1975,48,2021,2
+Itau Unibanco,2024,Milton Maluhy Filho,1975,49,2021,3
+Itau Unibanco,2025,Milton Maluhy Filho,1975,50,2021,4
+Banco Bradesco,2018,Octavio de Lazari Jr,1959,59,2018,0
+Banco Bradesco,2019,Octavio de Lazari Jr,1959,60,2018,1
+Banco Bradesco,2020,Octavio de Lazari Jr,1959,61,2018,2
+Banco Bradesco,2021,Octavio de Lazari Jr,1959,62,2018,3
+Banco Bradesco,2022,Octavio de Lazari Jr,1959,63,2018,4
+Banco Bradesco,2023,Octavio de Lazari Jr,1959,64,2018,5
+Banco Bradesco,2024,Octavio de Lazari Jr,1959,65,2018,6
+Banco Bradesco,2025,Octavio de Lazari Jr,1959,66,2018,7
+Banco Santander Brasil,2018,Mario Leao,1971,47,2022,0
+Banco Santander Brasil,2019,Mario Leao,1971,48,2022,0
+Banco Santander Brasil,2020,Mario Leao,1971,49,2022,0
+Banco Santander Brasil,2021,Mario Leao,1971,50,2022,0
+Banco Santander Brasil,2022,Mario Leao,1971,51,2022,0
+Banco Santander Brasil,2023,Mario Leao,1971,52,2022,1
+Banco Santander Brasil,2024,Mario Leao,1971,53,2022,2
+Banco Santander Brasil,2025,Mario Leao,1971,54,2022,3
+Banco de Chile,2018,Eduardo Ebensperger,1964,54,2018,0
+Banco de Chile,2019,Eduardo Ebensperger,1964,55,2018,1
+Banco de Chile,2020,Eduardo Ebensperger,1964,56,2018,2
+Banco de Chile,2021,Eduardo Ebensperger,1964,57,2018,3
+Banco de Chile,2022,Eduardo Ebensperger,1964,58,2018,4
+Banco de Chile,2023,Eduardo Ebensperger,1964,59,2018,5
+Banco de Chile,2024,Eduardo Ebensperger,1964,60,2018,6
+Banco de Chile,2025,Eduardo Ebensperger,1964,61,2018,7

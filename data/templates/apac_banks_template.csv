@@ -1,0 +1,64 @@
+bank,fiscal_year,country,is_gsib,is_usa,total_assets,net_income,total_equity,roa,roe,ln_assets,D_genai,ai_mentions,ceo_age,ceo_tenure,source
+DBS,2018,Singapore,0,0,,,,,,,0,,,,annual_report
+DBS,2019,Singapore,0,0,,,,,,,0,,,,annual_report
+DBS,2020,Singapore,0,0,,,,,,,0,,,,annual_report
+DBS,2021,Singapore,0,0,,,,,,,0,,,,annual_report
+DBS,2022,Singapore,0,0,,,,,,,0,,,,annual_report
+DBS,2023,Singapore,0,0,,,,,,,1,,,,annual_report
+DBS,2024,Singapore,0,0,,,,,,,1,,,,annual_report
+OCBC,2018,Singapore,0,0,,,,,,,0,,,,annual_report
+OCBC,2019,Singapore,0,0,,,,,,,0,,,,annual_report
+OCBC,2020,Singapore,0,0,,,,,,,0,,,,annual_report
+OCBC,2021,Singapore,0,0,,,,,,,0,,,,annual_report
+OCBC,2022,Singapore,0,0,,,,,,,0,,,,annual_report
+OCBC,2023,Singapore,0,0,,,,,,,1,,,,annual_report
+OCBC,2024,Singapore,0,0,,,,,,,1,,,,annual_report
+UOB,2018,Singapore,0,0,,,,,,,0,,,,annual_report
+UOB,2019,Singapore,0,0,,,,,,,0,,,,annual_report
+UOB,2020,Singapore,0,0,,,,,,,0,,,,annual_report
+UOB,2021,Singapore,0,0,,,,,,,0,,,,annual_report
+UOB,2022,Singapore,0,0,,,,,,,0,,,,annual_report
+UOB,2023,Singapore,0,0,,,,,,,1,,,,annual_report
+UOB,2024,Singapore,0,0,,,,,,,1,,,,annual_report
+CBA,2018,Australia,0,0,,,,,,,0,,,,annual_report
+CBA,2019,Australia,0,0,,,,,,,0,,,,annual_report
+CBA,2020,Australia,0,0,,,,,,,0,,,,annual_report
+CBA,2021,Australia,0,0,,,,,,,0,,,,annual_report
+CBA,2022,Australia,0,0,,,,,,,0,,,,annual_report
+CBA,2023,Australia,0,0,,,,,,,1,,,,annual_report
+CBA,2024,Australia,0,0,,,,,,,1,,,,annual_report
+Westpac,2018,Australia,0,0,,,,,,,0,,,,annual_report
+Westpac,2019,Australia,0,0,,,,,,,0,,,,annual_report
+Westpac,2020,Australia,0,0,,,,,,,0,,,,annual_report
+Westpac,2021,Australia,0,0,,,,,,,0,,,,annual_report
+Westpac,2022,Australia,0,0,,,,,,,0,,,,annual_report
+Westpac,2023,Australia,0,0,,,,,,,1,,,,annual_report
+Westpac,2024,Australia,0,0,,,,,,,1,,,,annual_report
+NAB,2018,Australia,0,0,,,,,,,0,,,,annual_report
+NAB,2019,Australia,0,0,,,,,,,0,,,,annual_report
+NAB,2020,Australia,0,0,,,,,,,0,,,,annual_report
+NAB,2021,Australia,0,0,,,,,,,0,,,,annual_report
+NAB,2022,Australia,0,0,,,,,,,0,,,,annual_report
+NAB,2023,Australia,0,0,,,,,,,1,,,,annual_report
+NAB,2024,Australia,0,0,,,,,,,1,,,,annual_report
+ANZ,2018,Australia,0,0,,,,,,,0,,,,annual_report
+ANZ,2019,Australia,0,0,,,,,,,0,,,,annual_report
+ANZ,2020,Australia,0,0,,,,,,,0,,,,annual_report
+ANZ,2021,Australia,0,0,,,,,,,0,,,,annual_report
+ANZ,2022,Australia,0,0,,,,,,,0,,,,annual_report
+ANZ,2023,Australia,0,0,,,,,,,1,,,,annual_report
+ANZ,2024,Australia,0,0,,,,,,,1,,,,annual_report
+HangSeng,2018,Hong Kong,0,0,,,,,,,0,,,,annual_report
+HangSeng,2019,Hong Kong,0,0,,,,,,,0,,,,annual_report
+HangSeng,2020,Hong Kong,0,0,,,,,,,0,,,,annual_report
+HangSeng,2021,Hong Kong,0,0,,,,,,,0,,,,annual_report
+HangSeng,2022,Hong Kong,0,0,,,,,,,0,,,,annual_report
+HangSeng,2023,Hong Kong,0,0,,,,,,,1,,,,annual_report
+HangSeng,2024,Hong Kong,0,0,,,,,,,1,,,,annual_report
+BOCHK,2018,Hong Kong,0,0,,,,,,,0,,,,annual_report
+BOCHK,2019,Hong Kong,0,0,,,,,,,0,,,,annual_report
+BOCHK,2020,Hong Kong,0,0,,,,,,,0,,,,annual_report
+BOCHK,2021,Hong Kong,0,0,,,,,,,0,,,,annual_report
+BOCHK,2022,Hong Kong,0,0,,,,,,,0,,,,annual_report
+BOCHK,2023,Hong Kong,0,0,,,,,,,1,,,,annual_report
+BOCHK,2024,Hong Kong,0,0,,,,,,,1,,,,annual_report

@@ -1,0 +1,141 @@
+bank,cik,proxy_year,filing_date,ceo_name,ceo_age
+JPMorgan Chase,19617,2019,2019-04-05,in control,72.0
+JPMorgan Chase,19617,2020,2020-04-06,in control,80.0
+JPMorgan Chase,19617,2021,2021-04-07,in control,79.0
+JPMorgan Chase,19617,2022,2022-04-04,in control,80.0
+JPMorgan Chase,19617,2023,2023-04-04,performance disclosure,76.0
+JPMorgan Chase,19617,2024,2024-04-08,performance disclosure,71.0
+JPMorgan Chase,19617,2025,2025-04-07,performance disclosure,72.0
+Bank of America,70858,2019,2019-03-13,in Control,66.0
+Bank of America,70858,2020,2020-03-09,in control,68.0
+Bank of America,70858,2021,2021-03-08,in control,71.0
+Bank of America,70858,2022,2022-03-07,in control,80.0
+Bank of America,70858,2023,2023-03-07,in control,76.0
+Bank of America,70858,2024,2024-03-11,in control,83.0
+Bank of America,70858,2025,2025-03-10,in control,75.0
+Citigroup,831001,2019,2019-03-06,Barbara J. Desoer,66.0
+Citigroup,831001,2020,2020-03-11,Fraser,59.0
+Citigroup,831001,2021,2021-03-17,Jane Fraser,50.0
+Citigroup,831001,2022,2022-03-15,Fraser,54.0
+Citigroup,831001,2023,2023-03-15,Jane Fraser,50.0
+Citigroup,831001,2024,2024-03-19,Jane Fraser,50.0
+Citigroup,831001,2025,2025-03-18,,
+Wells Fargo,72971,2019,2019-03-13,,
+Wells Fargo,72971,2020,2020-03-16,,
+Wells Fargo,72971,2021,2021-03-16,and Development,63.0
+Wells Fargo,72971,2022,2022-03-14,,
+Wells Fargo,72971,2023,2023-03-15,,
+Wells Fargo,72971,2024,2024-03-18,,
+Wells Fargo,72971,2025,2025-03-19,Compensation Tables,74.0
+Goldman Sachs,886982,2019,2019-03-22,,
+Goldman Sachs,886982,2020,2020-03-20,David Solomon,58.0
+Goldman Sachs,886982,2021,2021-03-19,,
+Goldman Sachs,886982,2022,2022-03-18,,
+Goldman Sachs,886982,2023,2023-03-17,,
+Goldman Sachs,886982,2024,2024-03-15,,
+Goldman Sachs,886982,2025,2025-03-14,David Solomon,39.0
+Morgan Stanley,895421,2019,2019-04-05,,
+Morgan Stanley,895421,2020,2020-04-03,,
+Morgan Stanley,895421,2021,2021-04-01,,
+Morgan Stanley,895421,2022,2022-04-08,,
+Morgan Stanley,895421,2023,2023-04-06,Gorman,64.0
+Morgan Stanley,895421,2024,2024-04-05,James Gorman,60.0
+Morgan Stanley,895421,2025,2025-04-04,,
+Bank of New York Mellon,1390777,2019,2019-03-08,,
+Bank of New York Mellon,1390777,2020,2020-03-03,,
+Bank of New York Mellon,1390777,2021,2021-03-02,Robin Vince,75.0
+Bank of New York Mellon,1390777,2022,2022-03-01,Robin Vince,75.0
+Bank of New York Mellon,1390777,2023,2023-03-01,,
+Bank of New York Mellon,1390777,2024,2024-02-29,,
+Bank of New York Mellon,1390777,2025,2025-03-05,,
+State Street,93751,2019,2019-04-05,Committee Report,52.0
+State Street,93751,2020,2020-04-08,Committee Report,48.0
+State Street,93751,2021,2021-04-06,,
+State Street,93751,2022,2022-04-06,,
+State Street,93751,2023,2023-04-05,,
+State Street,93751,2024,2024-04-03,,
+State Street,93751,2025,2025-04-03,Versus Performance,81.0
+US Bancorp,36104,2019,2019-03-05,,
+US Bancorp,36104,2020,2020-03-10,,
+US Bancorp,36104,2021,2021-03-09,Cecere,60.0
+US Bancorp,36104,2022,2022-03-08,Cecere,61.0
+US Bancorp,36104,2023,2023-03-07,Cecere,62.0
+US Bancorp,36104,2024,2024-03-05,Cecere,63.0
+US Bancorp,36104,2025,2025-03-05,Cecere,64.0
+PNC Financial,713676,2019,2019-03-12,upon termination,78.0
+PNC Financial,713676,2020,2020-03-17,upon termination,79.0
+PNC Financial,713676,2021,2021-03-16,upon termination,76.0
+PNC Financial,713676,2022,2022-03-16,upon termination,78.0
+PNC Financial,713676,2023,2023-03-15,upon termination,85.0
+PNC Financial,713676,2024,2024-03-13,,
+PNC Financial,713676,2025,2025-03-12,,
+Truist Financial,92230,2019,2019-03-19,,
+Truist Financial,92230,2020,2020-03-17,Nido R. Qubein,71.0
+Truist Financial,92230,2021,2021-03-15,Bundy Scanlan,63.0
+Truist Financial,92230,2022,2022-03-14,Bundy Scanlan,64.0
+Truist Financial,92230,2023,2023-03-13,Bundy Scanlan,65.0
+Truist Financial,92230,2024,2024-03-11,Bundy Scanlan,66.0
+Truist Financial,92230,2025,2025-03-17,Bundy Scanlan,67.0
+Capital One,927628,2019,2019-03-20,and Objectives,55.0
+Capital One,927628,2020,2020-03-19,and Objectives,58.0
+Capital One,927628,2021,2021-03-24,Governance Cycle,65.0
+Capital One,927628,2022,2022-03-21,Governance Cycle,69.0
+Capital One,927628,2023,2023-03-22,Anthony Williams,53.0
+Capital One,927628,2024,2024-03-20,Governance Cycle,74.0
+Capital One,927628,2025,2025-03-27,Governance Cycle,66.0
+Fifth Third Bancorp,35527,2019,2019-03-06,Committee Report,58.0
+Fifth Third Bancorp,35527,2020,2020-03-04,Committee Report,62.0
+Fifth Third Bancorp,35527,2021,2021-03-02,Committee Report,66.0
+Fifth Third Bancorp,35527,2022,2022-03-01,Committee Report,69.0
+Fifth Third Bancorp,35527,2023,2023-03-06,in Control,78.0
+Fifth Third Bancorp,35527,2024,2024-03-05,in Control,80.0
+Fifth Third Bancorp,35527,2025,2025-03-04,in Control,71.0
+KeyCorp,91576,2019,2019-04-05,,
+KeyCorp,91576,2020,2020-04-03,,
+KeyCorp,91576,2021,2021-03-26,in the,42.0
+KeyCorp,91576,2022,2022-03-25,,
+KeyCorp,91576,2023,2023-03-24,,
+KeyCorp,91576,2024,2024-03-22,,
+KeyCorp,91576,2025,2025-03-28,,
+Huntington Bancshares,49196,2019,2019-03-07,STEPHEN D. STEINOUR,60.0
+Huntington Bancshares,49196,2020,2020-03-12,,
+Huntington Bancshares,49196,2021,2021-03-12,,
+Huntington Bancshares,49196,2022,2022-03-10,,
+Huntington Bancshares,49196,2023,2023-03-09,,
+Huntington Bancshares,49196,2024,2024-03-07,AMIT DHINGRA,50.0
+Huntington Bancshares,49196,2025,2025-03-06,STEPHEN D. STEINOUR,66.0
+M&T Bank,36270,2019,2019-03-07,Compensation Table,58.0
+M&T Bank,36270,2020,2020-03-09,Compensation Table,60.0
+M&T Bank,36270,2021,2021-03-08,Compensation Table,65.0
+M&T Bank,36270,2022,2022-03-16,Compensation Table,68.0
+M&T Bank,36270,2023,2023-03-07,Compensation Table,64.0
+M&T Bank,36270,2024,2024-03-05,Compensation Table,65.0
+M&T Bank,36270,2025,2025-03-04,Compensation Table,68.0
+Regions Financial,1281761,2019,2019-03-08,Composition Matrix,45.0
+Regions Financial,1281761,2020,2020-03-06,,
+Regions Financial,1281761,2021,2021-03-05,,
+Regions Financial,1281761,2022,2022-03-04,,
+Regions Financial,1281761,2023,2023-03-06,,
+Regions Financial,1281761,2024,2024-03-04,,
+Regions Financial,1281761,2025,2025-03-03,,
+Northern Trust,73124,2019,2019-03-12,the Corporation,54.0
+Northern Trust,73124,2020,2020-03-10,the Corporation,56.0
+Northern Trust,73124,2021,2021-03-09,the Corporation,58.0
+Northern Trust,73124,2022,2022-03-17,the Corporation,58.0
+Northern Trust,73124,2023,2023-03-16,the Corporation,65.0
+Northern Trust,73124,2024,2024-03-06,the Corporation,62.0
+Northern Trust,73124,2025,2025-03-12,the Corporation,65.0
+First Citizens BancShares,798941,2019,2019-03-11,,
+First Citizens BancShares,798941,2020,2020-02-26,,
+First Citizens BancShares,798941,2021,2021-03-10,,
+First Citizens BancShares,798941,2022,2022-03-09,,
+First Citizens BancShares,798941,2023,2023-03-13,,
+First Citizens BancShares,798941,2024,2024-03-15,,
+First Citizens BancShares,798941,2025,2025-03-18,,
+Charles Schwab,316709,2019,2019-03-29,,
+Charles Schwab,316709,2020,2020-03-31,,
+Charles Schwab,316709,2021,2021-04-02,,
+Charles Schwab,316709,2022,2022-04-01,,
+Charles Schwab,316709,2023,2023-03-31,,
+Charles Schwab,316709,2024,2024-04-05,,
+Charles Schwab,316709,2025,2025-04-04,,

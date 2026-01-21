@@ -1,0 +1,75 @@
+
+================================================================================
+TIER 1 CAPITAL RATIO DOWNLOAD INSTRUCTIONS
+================================================================================
+
+SOURCE 1: FR Y-9C (Bank Holding Companies) - FFIEC NIC
+--------------------------------------------------------
+URL: https://www.ffiec.gov/npw/FinancialReport/FinancialDataDownload
+
+STEPS:
+1. Go to the URL above
+2. Under "Holding Company Financial Data", select:
+   - Report Type: BHCF (FR Y-9C Consolidated)
+   - Year: 2019, 2020, 2021, 2022, 2023, 2024
+   - Quarter: 1, 2, 3, 4
+3. Click "Download" for each quarter
+4. Save files to: data/raw/ffiec/
+
+KEY VARIABLES IN DOWNLOADED FILES:
+- RSSD9001: Bank RSSD ID (unique identifier)
+- RSSD9017: Bank name
+- BHCK7206: Tier 1 Risk-Based Capital Ratio (%) <-- PRIMARY TARGET
+- BHCK7205: Total Risk-Based Capital Ratio (%)
+- BHCK7204: Tier 1 Leverage Ratio (%)
+- BHCK2170: Total Consolidated Assets
+
+================================================================================
+
+SOURCE 2: Call Reports (Individual Banks) - FFIEC CDR
+------------------------------------------------------
+URL: https://cdr.ffiec.gov/public/PWS/DownloadBulkData.aspx
+
+STEPS:
+1. Go to the URL above
+2. Select:
+   - Report: "Call Reports - Single Period"
+   - Period: Select each quarter (2019Q1 through 2024Q3)
+   - Schedules: Select "RC-R - Regulatory Capital"
+3. Click "Download"
+4. Save files to: data/raw/ffiec/
+
+KEY VARIABLES IN DOWNLOADED FILES:
+- IDRSSD: Bank RSSD ID
+- RCFAP858: Tier 1 Risk-Based Capital Ratio (%) <-- PRIMARY TARGET
+- RCFAP859: Total Risk-Based Capital Ratio (%)
+- RCFAA223: Tier 1 Leverage Ratio (%)
+
+================================================================================
+
+AFTER DOWNLOADING:
+-----------------
+Place all downloaded files in: data/raw/ffiec/
+
+Then run:
+    python fetch_tier1_from_ffiec_nic.py
+
+The script will:
+1. Parse all downloaded files
+2. Extract RSSD ID and Tier 1 Capital Ratio
+3. Map to your panel using CIK-RSSD mapping
+4. Merge with existing panel data
+5. Save to: data/processed/genai_panel_with_capital.csv
+
+================================================================================
+
+VARIABLE REFERENCE (MDRM Data Dictionary):
+-----------------------------------------
+https://www.ffiec.gov/npw/Help/DataDictionary
+
+Search for:
+- BHCK7206: "Tier 1 risk-based capital ratio"
+- BHCK7205: "Total risk-based capital ratio"
+- BHCK7204: "Tier 1 leverage ratio"
+
+================================================================================
