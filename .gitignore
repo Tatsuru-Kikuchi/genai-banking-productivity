@@ -1,10 +1,4 @@
-# =============================================================================
-# .gitignore for GenAI Banking Productivity Analysis
-# =============================================================================
-
-# -----------------------------------------------------------------------------
 # Python
-# -----------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
@@ -13,92 +7,46 @@ __pycache__/
 .env
 venv/
 ENV/
-.venv/
 
-# -----------------------------------------------------------------------------
-# Data files (too large for GitHub - regenerate via pipeline)
-# -----------------------------------------------------------------------------
-
-# Raw FFIEC data (download from https://cdr.ffiec.gov/)
+# Data files (too large for GitHub)
 data/raw/ffiec/*.csv
 data/raw/ffiec/*.txt
-data/raw/ffiec/*.TXT
 data/raw/ffiec/*.ZIP
-data/raw/ffiec/*.zip
-
-# Raw SEC data (regenerate via 01_sec_bank_discovery.py)
-data/raw/sec_edgar/*.csv
-data/raw/sec_edgar/*.json
-
-# 10-K/10-Q filing text files
+data/raw/sec_edgar/
 data/raw/10k_filings/
 data/raw/10q_*.csv
 data/raw/ai_mentions_*.csv
+data/raw/international_filings/
+data/raw/*.csv
 
-# Intermediate files
-data/interim/
-
-# Large processed files (regenerate via pipeline)
-# Keep the directory structure
+# Keep processed data structure but not large files
 data/processed/*.csv
 !data/processed/.gitkeep
 
-# -----------------------------------------------------------------------------
-# Keep these essential files (small enough for GitHub)
-# -----------------------------------------------------------------------------
-!data/raw/crosswalk/crsp_20240930.csv
-!docs/*.md
+# Keep interim structure
+data/interim/*.csv
+!data/interim/.gitkeep
 
-# -----------------------------------------------------------------------------
-# Output files (reproducible via analysis scripts)
-# -----------------------------------------------------------------------------
+# Output files (reproducible)
 output/figures/*.png
-output/figures/*.pdf
 output/tables/*.csv
-output/tables/*.tex
 
-# Keep directory structure
-!output/figures/.gitkeep
-!output/tables/.gitkeep
-
-# -----------------------------------------------------------------------------
-# OS-specific files
-# -----------------------------------------------------------------------------
+# OS files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
-# -----------------------------------------------------------------------------
-# IDE and editor files
-# -----------------------------------------------------------------------------
+# IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-*~
-.project
-.pydevproject
-.settings/
 
-# -----------------------------------------------------------------------------
-# Jupyter Notebook
-# -----------------------------------------------------------------------------
+# Jupyter
 .ipynb_checkpoints/
-*.ipynb
 
-# -----------------------------------------------------------------------------
-# Testing
-# -----------------------------------------------------------------------------
-.pytest_cache/
-.coverage
-htmlcov/
-
-# -----------------------------------------------------------------------------
 # Logs
-# -----------------------------------------------------------------------------
 *.log
-logs/
+
+# Temporary files
+*.tmp
+*_progress.csv

@@ -1,0 +1,39 @@
+======================================================================
+ESTIMATION SAMPLE SUMMARY
+======================================================================
+Generated: 2026-01-21 18:58:26
+
+SAMPLE DIMENSIONS
+----------------------------------------
+Full Panel:
+  Observations: 2500
+  Banks (N): 168
+  Quarters (T): 27
+
+Balanced Panel (≥16 quarters):
+  Observations: 1972
+  Banks (N): 84
+
+TREATMENT/CONTROL
+----------------------------------------
+Control banks (never AI): 38
+Control in balanced: 9
+Treatment period: 2023Q1 onward
+
+DESCRIPTIVE STATISTICS (Balanced Panel)
+----------------------------------------
+         roa_pct    roe_pct  tier1_ratio  ln_assets  ai_adopted  genai_adopted  total_ai_mentions
+count  1972.0000  1972.0000    1885.0000  1972.0000   1972.0000      1972.0000          1972.0000
+mean      0.5161     4.8454      12.7590    16.4869      0.6324         0.6014             9.3595
+std       0.4920     5.0188       2.2432     1.4774      0.4823         0.4897            28.4568
+min      -5.4818   -59.0254       7.8054    13.5904      0.0000         0.0000             0.0000
+25%       0.2802     2.6599      11.2022    15.4253      0.0000         0.0000             0.0000
+50%       0.4895     4.6011      12.3029    16.2078      1.0000         1.0000             1.0000
+75%       0.7444     6.9962      13.8408    17.1872      1.0000         1.0000             4.2500
+max       5.1232    53.7140      21.2750    20.3599      1.0000         1.0000           298.0000
+
+PRE vs POST CHATGPT
+----------------------------------------
+              roa_pct  roe_pct  tier1_ratio  ln_assets  ai_adopted  genai_adopted  total_ai_mentions
+Pre-ChatGPT    0.5459   5.0668      12.7500    16.3481      0.6094         0.6022             8.5259
+Post-ChatGPT   0.4638   4.4561      12.7749    16.7309      0.6727         0.6000            10.8252

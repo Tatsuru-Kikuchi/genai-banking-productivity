@@ -2,269 +2,234 @@
 
 ## Overview
 
-This document defines all variables in the quarterly panel dataset for DSDM and SDID analysis.
+This document describes all variables in the estimation panel data files for the GenAI Banking Productivity project.
 
----
+## Main Panel Files
 
-## Main Panel: `dsdm_panel_quarterly.csv`
-
-### Panel Structure
-
-| Property | Value |
-|----------|-------|
-| Unit of observation | Bank-quarter |
-| Unit identifier | `rssd_id` |
-| Time identifier | `year_quarter` |
-| Sample size | ~3,600 observations |
-| Time span | 2018Q1 – 2024Q4 |
+| File | Description | Observations |
+|------|-------------|--------------|
+| `estimation_panel_quarterly.csv` | Full quarterly panel | ~5,000 bank-quarters |
+| `estimation_panel_balanced.csv` | Balanced panel (≥16 quarters) | ~3,000 bank-quarters |
 
 ---
 
 ## Identifier Variables
 
-| Variable | Type | Source | Description |
-|----------|------|--------|-------------|
-| `rssd_id` | string | Fed | Federal Reserve RSSD ID (primary key) |
-| `cik` | string | SEC | SEC Central Index Key |
-| `bank` | string | SEC | Bank holding company name |
-| `sic_code` | string | SEC | Standard Industrial Classification |
+| Variable | Type | Description | Source |
+|----------|------|-------------|--------|
+| `cik` | string | SEC Central Index Key | SEC EDGAR |
+| `rssd_id` | string | Federal Reserve RSSD identifier | FFIEC |
+| `bank` / `bank_name` | string | Bank holding company name | SEC EDGAR |
+| `year` | integer | Fiscal year (2018-2025) | Derived |
+| `quarter` / `fiscal_quarter` | integer | Fiscal quarter (1-4) | Derived |
+| `year_quarter` | string | Year-quarter identifier (e.g., "2023Q1") | Derived |
 
 ---
 
-## Time Variables
+## Dependent Variables (Outcome)
 
-| Variable | Type | Format | Description |
-|----------|------|--------|-------------|
-| `year_quarter` | string | "2023Q2" | Primary time identifier |
-| `year` | int | 2023 | Calendar year |
-| `quarter` | int | 1-4 | Calendar quarter |
+| Variable | Type | Description | Source | Unit |
+|----------|------|-------------|--------|------|
+| `roa_pct` | float | Return on Assets | FFIEC FR Y-9C | Percent (%) |
+| `roe_pct` | float | Return on Equity | FFIEC FR Y-9C | Percent (%) |
 
----
+### Calculation
 
-## AI Adoption Variables
-
-### Treatment Indicators
-
-| Variable | Type | Description |
-|----------|------|-------------|
-| `D_genai` | binary | 1 if GenAI keyword mentioned in filing |
-| `genai_adopted` | binary | Alias for D_genai |
-| `is_ai_adopter` | binary | SDID treatment: 1 if high AI adopter post-2022 |
-| `post_chatgpt` | binary | 1 if quarter ≥ 2022Q4 |
-
-### AI Mention Counts
-
-| Variable | Type | Description |
-|----------|------|-------------|
-| `genai_mentions` | int | Count of GenAI-specific keywords |
-| `ai_general_mentions` | int | Count of general AI keywords |
-| `total_ai_mentions` | int | Sum of all AI categories |
-| `genai_intensity` | float | GenAI mentions per 10,000 words |
-
----
-
-## Financial Variables (Fed FR Y-9C)
-
-### Productivity Measures (Dependent Variables)
-
-| Variable | Type | MDRM | Description |
-|----------|------|------|-------------|
-| `roa_pct` | float | Derived | Return on Assets (%, annualized) |
-| `roe_pct` | float | Derived | Return on Equity (%, annualized) |
-
-**Calculation:**
 ```
-ROA_quarterly = (Net_Income_quarterly / Total_Assets) × 4 × 100
-ROE_quarterly = (Net_Income_quarterly / Total_Equity) × 4 × 100
+ROA = (Net Income / Total Assets) × 100
+ROE = (Net Income / Total Equity) × 100
 ```
 
-### Balance Sheet Variables
-
-| Variable | Type | MDRM Code | Description |
-|----------|------|-----------|-------------|
-| `total_assets` | float | BHCK2170 | Total consolidated assets ($ thousands) |
-| `total_equity` | float | BHCK3210 | Total equity capital ($ thousands) |
-| `net_income_quarterly` | float | Derived | Quarterly net income |
-| `tier1_ratio` | float | BHCA7206 | Tier 1 capital ratio (%) |
-| `ln_assets` | float | Derived | log(total_assets) |
-
 ---
 
-## Lagged Variables (for DSDM)
+## Treatment Variables
 
-| Variable | Type | Description |
-|----------|------|-------------|
-| `roa_pct_lag1` | float | ROA at t-1 |
-| `roe_pct_lag1` | float | ROE at t-1 |
-| `ln_assets_lag1` | float | log(Assets) at t-1 |
+| Variable | Type | Description | Source |
+|----------|------|-------------|--------|
+| `total_ai_mentions` | integer | Count of AI-related keywords in 10-Q | SEC EDGAR |
+| `genai_mentions` | integer | Count of GenAI-specific keywords | SEC EDGAR |
+| `ai_adopted` | binary | 1 if any AI mention, 0 otherwise | Derived |
+| `genai_adopted` | binary | 1 if any GenAI mention, 0 otherwise | Derived |
+| `post_chatgpt` | binary | 1 if period ≥ 2022Q4, 0 otherwise | Derived |
+| `genai_x_post` | binary | Interaction: `genai_adopted × post_chatgpt` | Derived |
 
----
+### AI Keywords Searched
 
-## Spatial Weight Matrices
+**Traditional AI:**
+- artificial intelligence, machine learning, deep learning, neural network
+- natural language processing, computer vision, predictive analytics
 
-Three weight matrices capture different spillover channels:
-
-### W_geo.csv (Geographic)
-
-| Property | Description |
-|----------|-------------|
-| **Logic** | Labor market spillovers - AI talent mobility |
-| **Construction** | Inverse Haversine distance |
-| **Formula** | `W_ij = 1/distance_ij` or `exp(-d/100)` |
-| **Data Source** | ZIP codes (RSSD9200) → Lat/Long |
-| **Cutoff** | Optional 500-1000 km threshold |
-
-### W_network.csv (Network)
-
-| Property | Description |
-|----------|-------------|
-| **Logic** | Strategic competition - similar interbank profiles |
-| **Construction** | Cosine similarity of portfolio composition |
-| **Formula** | `W_ij = cos_sim(features_i, features_j)` |
-| **MDRM Codes** | BHDMB987, BHCKB989, BHCK5377, BHCK5380, BHCK0081 |
-
-**Interbank Activity MDRM Codes:**
-
-| Code | Description |
-|------|-------------|
-| BHDMB987 | Fed funds sold (domestic) |
-| BHCKB989 | Fed funds purchased |
-| BHCK5377 | Securities purchased under resale |
-| BHCK5380 | Securities sold under repo |
-| BHCK0081 | Other borrowed money |
-
-### W_size.csv (Size Similarity)
-
-| Property | Description |
-|----------|-------------|
-| **Logic** | Banks of similar size compete in same markets |
-| **Construction** | Exponential decay of asset difference |
-| **Formula** | `W_ij = exp(-|ln_assets_i - ln_assets_j|)` |
-| **Use Case** | Fallback when geo/network unavailable |
-
-### W Matrix Properties
-
-All matrices are:
-- **Square:** N × N where N = number of banks
-- **Row-normalized:** Each row sums to 1
-- **Zero diagonal:** W_ii = 0 (no self-influence)
-- **Non-negative:** W_ij ≥ 0
-
----
-
-## Spatial Lag Variables
-
-| Variable | Type | Description |
-|----------|------|-------------|
-| `W_D_genai` | float | Σ W_ij × D_genai_j (neighbors' AI adoption) |
-| `W_roa_pct` | float | Σ W_ij × ROA_j (neighbors' ROA) |
-| `W_roe_pct` | float | Σ W_ij × ROE_j (neighbors' ROE) |
-| `W_roa_pct_lag1` | float | Spatial lag of lagged ROA |
+**Generative AI:**
+- generative ai, generative artificial intelligence, chatgpt, gpt-4, gpt-3
+- large language model, llm, claude, bard, copilot, dall-e, midjourney
 
 ---
 
 ## Control Variables
 
-### Time-Varying (Quarterly)
+### Financial Controls (Quarterly)
 
-| Variable | Type | Source | Description |
-|----------|------|--------|-------------|
-| `tier1_ratio` | float | Fed Y-9C | Regulatory capital ratio |
-| `ln_assets` | float | Fed Y-9C | Bank size control |
+| Variable | Type | Description | Source | Unit |
+|----------|------|-------------|--------|------|
+| `ln_assets` | float | Natural log of total assets | FFIEC FR Y-9C | log($000s) |
+| `total_assets` | float | Total assets | FFIEC FR Y-9C | $000s |
+| `tier1_ratio` | float | Tier 1 capital ratio | FFIEC FR Y-9C | Percent (%) |
+| `total_equity` | float | Total equity capital | FFIEC FR Y-9C | $000s |
 
-### Time-Invariant (Annual → Spread)
+### CEO Demographics (Annual → Spread to Quarters)
 
-| Variable | Type | Source | Description |
-|----------|------|--------|-------------|
-| `ceo_age` | int | Manual | CEO age in years |
-| `digital_index` | float | 10-K | Digitalization score (standardized) |
+| Variable | Type | Description | Source | Unit |
+|----------|------|-------------|--------|------|
+| `ceo_age` | float | CEO age in years | SEC-API.io | Years |
+| `ceo_name` | string | CEO full name | SEC-API.io | — |
+
+**Extraction Method:**
+1. Query SEC-API.io Directors & Board Members API by CIK
+2. Filter directors with position containing "Chief Executive Officer" or "CEO"
+3. Extract age field for each fiscal year
+4. Interpolate missing years within bank
+5. Industry average (57) as fallback
+
+### Digitalization Index (Quarterly from 10-Q)
+
+| Variable | Type | Description | Source | Unit |
+|----------|------|-------------|--------|------|
+| `digital_index` | float | Digitalization z-score (within year-quarter) | SEC 10-Q | Standard deviations |
+| `digital_intensity` | float | Raw keyword count / word count × 10,000 | SEC 10-Q | Per 10,000 words |
+| `digital_raw` | integer | Total digitalization keyword count | SEC 10-Q | Count |
+
+**Keyword Categories and Weights:**
+
+| Category | Weight | Example Keywords |
+|----------|--------|-----------------|
+| Mobile Banking | 20% | mobile banking, mobile app, digital wallet |
+| Digital Transformation | 15% | digital strategy, digitalization, digital-first |
+| Cloud Computing | 15% | cloud computing, aws, azure, google cloud |
+| Automation | 10% | robotic process automation, rpa, workflow automation |
+| Data Analytics | 10% | big data, predictive analytics, data science |
+| Fintech | 10% | fintech, financial technology, neobank |
+| API/Open Banking | 10% | open banking, api integration, embedded finance |
+| Cybersecurity | 10% | cybersecurity, mfa, encryption, fraud detection |
+
+**Standardization:**
+```python
+digital_index = (digital_intensity - mean(year_quarter)) / std(year_quarter)
+```
 
 ---
 
-## DSDM Output: `dsdm_results.csv`
+## Spatial Variables
+
+| Variable | Type | Description | Source |
+|----------|------|-------------|--------|
+| `W_roa_pct` | float | Spatially lagged ROA | Computed: W × roa_pct |
+| `W_roe_pct` | float | Spatially lagged ROE | Computed: W × roe_pct |
+| `W_D_genai` | float | Spatially lagged GenAI adoption | Computed: W × genai_adopted |
+| `W_ln_assets` | float | Spatially lagged log assets | Computed: W × ln_assets |
+
+### Weight Matrices (W)
+
+| Matrix | Description | Construction |
+|--------|-------------|--------------|
+| `W_geographic.csv` | Geographic proximity | Inverse distance between HQ states |
+| `W_size_similarity.csv` | Size similarity | Based on asset size proximity |
+
+---
+
+## Time Variables
 
 | Variable | Type | Description |
 |----------|------|-------------|
-| `W_matrix` | string | Weight matrix used (W_geo, W_network, W_size) |
-| `Method` | string | Estimation method (OLS, MLE, Bayesian) |
-| `Parameter` | string | Parameter name (tau, rho, eta, beta, theta) |
-| `Estimate` | float | Point estimate |
-| `Std.Error` | float | Standard error |
-| `t_stat` | float | t-statistic |
-| `p_value` | float | p-value |
-
-**Parameter Definitions:**
-
-| Parameter | Symbol | Description |
-|-----------|--------|-------------|
-| `tau` | τ | Time persistence (own past productivity) |
-| `rho` | ρ | Spatial autoregressive (contemporaneous spillover) |
-| `eta` | η | Space-time lag (lagged spillover) |
-| `beta` | β | **Direct effect of AI adoption** |
-| `theta` | θ | **Spillover effect of neighbors' AI** |
+| `time_trend` | integer | Sequential time period (1, 2, 3, ...) |
+| `roa_pct_lag1` | float | One-quarter lag of ROA |
+| `roe_pct_lag1` | float | One-quarter lag of ROE |
+| `ln_assets_lag1` | float | One-quarter lag of log assets |
 
 ---
 
-## SDID Output: `sdid_multimethod_results.csv`
+## Size Classification
 
 | Variable | Type | Description |
 |----------|------|-------------|
-| `Outcome` | string | Dependent variable (roa_pct, roe_pct) |
-| `Sample` | string | Full Sample, Big Banks, Small Banks |
-| `Method` | string | MLE, Q-MLE, Bayesian |
-| `N_treated` | int | Number of treated banks |
-| `N_control` | int | Number of control banks |
-| `ATT` | float | Average Treatment effect on Treated |
-| `se` | float | Standard error |
-| `ci_lower` | float | 95% CI lower bound |
-| `ci_upper` | float | 95% CI upper bound |
+| `size_quartile` | category | Asset size quartile (Q1_Small, Q2, Q3, Q4_Large) |
+| `is_large_bank` | binary | 1 if in top quartile by assets |
 
 ---
 
-## AI Keyword Definitions
+## Data Quality Indicators
 
-### GenAI Keywords
-
-```
-generative ai, large language model, llm
-chatgpt, gpt-4, claude, anthropic, openai, gemini
-copilot, foundation model, transformer model
-```
-
-### General AI Keywords
-
-```
-artificial intelligence, machine learning
-deep learning, neural network
-predictive analytics, cognitive computing
-```
+| Variable | Type | Description |
+|----------|------|-------------|
+| `source` | string | Data source for CEO age: 'sec_api', 'interpolated', 'fallback' |
+| `filing_date` | date | SEC filing date |
 
 ---
 
-## MDRM Code Reference (FR Y-9C)
+## Missing Value Treatment
 
-| MDRM Code | Variable | Description |
-|-----------|----------|-------------|
-| RSSD9001 | rssd_id | Bank identifier |
-| RSSD9017 | bank_name | Legal name |
-| RSSD9200 | zip_code | HQ ZIP code |
-| BHCK2170 | total_assets | Total consolidated assets |
-| BHCK4340 | net_income_ytd | Net income (YTD) |
-| BHCK3210 | total_equity | Total equity capital |
-| BHCA7206 | tier1_ratio | Tier 1 capital ratio |
-| BHDMB987 | fed_funds_sold | Fed funds sold (domestic) |
-| BHCKB989 | fed_funds_purchased | Fed funds purchased |
-| BHCK5377 | securities_resale | Securities under resale |
-| BHCK5380 | securities_repo | Securities under repo |
-| BHCK0081 | other_borrowed | Other borrowed money |
+| Variable | Treatment |
+|----------|-----------|
+| `ceo_age` | Forward/backward fill within bank; industry average (57) as fallback |
+| `digital_index` | Fill with 0 (no digitalization keywords found) |
+| `tier1_ratio` | Keep as missing (may indicate data reporting issues) |
+| `roa_pct`, `roe_pct` | Keep as missing (required for outcome) |
+
+---
+
+## File-Specific Variables
+
+### ceo_age_data.csv
+
+| Variable | Description |
+|----------|-------------|
+| `cik` | SEC CIK |
+| `bank_name` | Bank name |
+| `year` | Fiscal year |
+| `ceo_name` | CEO full name |
+| `ceo_age` | Age in years |
+| `source` | Extraction source |
+| `filed_at` | Filing date |
+
+### digitalization_quarterly.csv
+
+| Variable | Description |
+|----------|-------------|
+| `cik` | SEC CIK |
+| `bank_name` | Bank name |
+| `fiscal_year` | Fiscal year |
+| `fiscal_quarter` | Fiscal quarter |
+| `year_quarter` | Year-quarter string |
+| `digital_index` | Standardized digitalization score |
+| `digital_intensity` | Raw intensity |
+| `dig_mobile_banking` | Mobile banking keyword count |
+| `dig_digital_transformation` | Digital transformation keyword count |
+| `dig_cloud` | Cloud computing keyword count |
+| `dig_automation` | Automation keyword count |
+| `dig_data_analytics` | Data analytics keyword count |
+| `dig_fintech` | Fintech keyword count |
+| `dig_api` | API/Open banking keyword count |
+| `dig_cybersecurity` | Cybersecurity keyword count |
+
+---
+
+## Summary Statistics (Expected)
+
+| Variable | Mean | Std | Min | Max |
+|----------|------|-----|-----|-----|
+| `roa_pct` | ~1.0 | ~0.5 | -2.0 | 3.0 |
+| `roe_pct` | ~10.0 | ~5.0 | -20.0 | 25.0 |
+| `ln_assets` | ~17.0 | ~2.0 | 13.0 | 22.0 |
+| `tier1_ratio` | ~12.0 | ~3.0 | 6.0 | 25.0 |
+| `ceo_age` | ~59.0 | ~7.0 | 40.0 | 80.0 |
+| `digital_index` | 0.0 | 1.0 | -2.0 | 3.0 |
+| `genai_adopted` | ~0.15 | — | 0 | 1 |
 
 ---
 
 ## Version History
 
-| Version | Date | Description |
-|---------|------|-------------|
-| 1.0 | 2024-01 | Annual panel (30 banks) |
-| 2.0 | 2025-01 | Quarterly expansion (129 banks) |
-| 2.1 | 2025-01 | Added W_geo, W_network matrices |
-| 2.2 | 2025-01 | SDID notation: τ → ATT |
+| Date | Version | Changes |
+|------|---------|---------|
+| 2025-01-22 | 3.0 | Added CEO age (SEC-API.io), quarterly digitalization (10-Q) |
+| 2025-01-15 | 2.0 | Expanded sample to 178 banks, quarterly panel |
+| 2024-12-01 | 1.0 | Initial panel with 30 banks |

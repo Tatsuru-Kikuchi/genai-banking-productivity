@@ -1,103 +1,373 @@
+#!/usr/bin/env python3
 """
-Build Final DSDM Panel - QUARTERLY VERSION with Control Variables
-=================================================================
-REVISED: Constructs quarterly panel for Dynamic Spatial Durbin Model analysis.
+Build Quarterly DSDM Panel with All Control Variables
+======================================================
+Constructs quarterly panel for Dynamic Spatial Durbin Model analysis
+with comprehensive control variables.
 
-Key Features:
-1. Merges AI mentions at QUARTERLY level (year_quarter)
-2. Merges financial variables at QUARTERLY level (from Fed Y-9C)
-3. Spreads ANNUAL control variables to all quarters:
-   - CEO Age: Merged on (bank, year), spread to Q1-Q4
-   - Digitalization Index: Merged on (bank, year), spread to Q1-Q4
+Control Variables:
+1. ln_assets: Natural log of total assets (quarterly, from FFIEC)
+2. tier1_ratio: Tier 1 capital ratio (quarterly, from FFIEC)
+3. ceo_age: CEO age in years (annual → spread to quarters, from SEC-API)
+4. digital_index: Digitalization z-score
+   - QUARTERLY preferred (from 10-Q) - better for 2025 Q1/Q2
+   - ANNUAL fallback (from 10-K) - spread to quarters
 
-Expected Panel Size: ~30 quarters × 50+ banks = 1,500+ observations
+Merge Strategy:
+- AI mentions + FFIEC financials: Merge on (rssd_id, year_quarter) - QUARTERLY
+- CEO age: Merge on (cik, year) → spread to all quarters - ANNUAL
+- Digitalization: 
+  - If quarterly (10-Q): Merge on (cik, year_quarter) - QUARTERLY
+  - If annual (10-K): Merge on (cik, year) → spread to quarters
 
 Data Sources:
-1. AI Mentions: SEC 10-K and 10-Q filings (quarterly)
-2. Financial Variables: Fed/FFIEC FR Y-9C data (quarterly)
-3. Control Variables (annual → spread to quarters):
-   - CEO demographics
-   - Digitalization index from 10-K
-4. Bank Identifiers: NY Fed CRSP-FRB Link crosswalk
+1. AI Mentions: data/raw/10q_ai_mentions_quarterly.csv
+2. FFIEC Financials: data/processed/ffiec_quarterly_research.csv
+3. CEO Age: data/processed/ceo_age_data.csv (from SEC-API.io)
+4. Digitalization (quarterly): data/processed/digitalization_quarterly.csv (from 10-Q)
+5. Digitalization (annual): data/processed/digitalization_index.csv (from 10-K)
+6. CIK-RSSD Mapping: Comprehensive manual + crosswalk
 
 Usage:
-    python code/build_quarterly_dsdm_panel.py
+    python code/05_build_quarterly_panel.py
+
+Output:
+    data/processed/estimation_panel_quarterly.csv
+    data/processed/estimation_panel_balanced.csv
 """
 
 import pandas as pd
 import numpy as np
 import os
-import sys
+from datetime import datetime
+from difflib import SequenceMatcher
+
+
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+
+CONFIG = {
+    'start_year': 2018,
+    'end_year': 2025,
+    'min_quarters_balanced': 16,  # Minimum quarters for balanced panel
+    'min_quarters_relaxed': 8,    # Minimum quarters for relaxed panel
+}
+
+
+# =============================================================================
+# PATH SETUP
+# =============================================================================
+
+def get_paths():
+    """Get all file paths."""
+    script_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in dir() else '.'
+    project_root = os.path.dirname(script_dir) if os.path.basename(script_dir) == 'code' else script_dir
+    
+    # Try to find project root by looking for 'data' directory
+    for _ in range(5):
+        if os.path.exists(os.path.join(project_root, 'data')):
+            break
+        project_root = os.path.dirname(project_root)
+    
+    return {
+        'project_root': project_root,
+        # Input files
+        'ai_mentions': os.path.join(project_root, 'data', 'raw', '10q_ai_mentions_quarterly.csv'),
+        'ffiec_financials': os.path.join(project_root, 'data', 'processed', 'ffiec_quarterly_research.csv'),
+        'ceo_age': os.path.join(project_root, 'data', 'processed', 'ceo_age_data.csv'),
+        'digitalization_quarterly': os.path.join(project_root, 'data', 'processed', 'digitalization_quarterly.csv'),
+        'digitalization_annual': os.path.join(project_root, 'data', 'processed', 'digitalization_index.csv'),
+        'cik_rssd_mapping': os.path.join(project_root, 'data', 'processed', 'cik_rssd_mapping_enhanced.csv'),
+        # Output files
+        'output_full': os.path.join(project_root, 'data', 'processed', 'estimation_panel_quarterly.csv'),
+        'output_balanced': os.path.join(project_root, 'data', 'processed', 'estimation_panel_balanced.csv'),
+    }
+
+
+# =============================================================================
+# COMPREHENSIVE CIK-RSSD MAPPING
+# =============================================================================
+
+def get_manual_cik_rssd_mapping():
+    """
+    Comprehensive manual CIK → RSSD mappings.
+    Verified via SEC EDGAR, FFIEC NIC, and NY Fed crosswalk.
+    """
+    
+    return {
+        # G-SIBs
+        '19617': '1039502',      # JPMorgan Chase
+        '70858': '1073757',      # Bank of America
+        '72971': '1120754',      # Wells Fargo
+        '831001': '1951350',     # Citigroup
+        '886982': '2380443',     # Goldman Sachs
+        '895421': '2162966',     # Morgan Stanley
+        '1390777': '3587146',    # BNY Mellon
+        '93751': '1111435',      # State Street
+        
+        # Large Regional ($50B+)
+        '36104': '1119794',      # US Bancorp
+        '713676': '1069778',     # PNC Financial
+        '92230': '1074156',      # Truist Financial
+        '927628': '2277860',     # Capital One
+        '35527': '1070345',      # Fifth Third Bancorp
+        '91576': '1068025',      # KeyCorp
+        '1281761': '3242838',    # Regions Financial
+        '36270': '1037003',      # M&T Bank
+        '49196': '1068191',      # Huntington Bancshares
+        '759944': '1132449',     # Citizens Financial Group
+        '109380': '1027004',     # Zions Bancorporation
+        '28412': '1199844',      # Comerica
+        '73124': '1199611',      # Northern Trust
+        
+        # Mid-Size Banks ($10B-$50B)
+        '40729': '1562859',      # Ally Financial
+        '36966': '1094640',      # First Horizon
+        '1069157': '2734233',    # East West Bancorp
+        '868671': '2466727',     # Glacier Bancorp
+        '875357': '1883693',     # BOK Financial
+        '798941': '1075612',     # First Citizens BancShares
+        '18349': '1078846',      # Synovus Financial
+        '39263': '1102367',      # Cullen/Frost Bankers
+        '763901': '1246994',     # Popular Inc
+        '1028918': '2494828',    # Pacific Premier Bancorp
+        '860413': '3815783',     # First Interstate BancSystem
+        '1004702': '2162648',    # OceanFirst Financial
+        '1050441': '3071778',    # Eagle Bancorp
+        '824410': '1200920',     # Sandy Spring Bancorp
+        '714310': '2259921',     # Valley National Bancorp
+        '861842': '2166371',     # Cathay General Bancorp
+        '354647': '1451480',     # CVB Financial Corp
+        '712534': '1207793',     # First Merchants Corp
+        '1025835': '2747645',    # Enterprise Financial
+        '1265131': '3511149',    # Hilltop Holdings
+        '90498': '3098882',      # Simmons First National
+        '1331520': '2813319',    # Home BancShares
+        '1614184': '4284546',    # Cadence Bancorporation
+        
+        # Regional Banks ($1B-$10B)
+        '7789': '1027518',       # Associated Banc-Corp
+        '34782': '1048773',      # 1st Source Corp
+        '36029': '1244672',      # First Financial Bankshares
+        '36377': '3403244',      # First Hawaiian
+        '39311': '1212589',      # Independent Bank Corp MI
+        '46195': '1001570',      # Bank of Hawaii
+        '350852': '993962',      # Community Trust Bancorp
+        '351569': '2260406',     # Ameris Bancorp
+        '357173': '1210485',     # Old Second Bancorp
+        '700565': '1208197',     # First Mid Bancshares
+        '701347': '3284886',     # Central Pacific Financial
+        '702325': '1209139',     # First Midwest Bancorp
+        '709337': '1210728',     # Farmers National Banc
+        '711669': '1096053',     # Colony Bankcorp
+        '711772': '2607311',     # Cambridge Bancorp
+        '712537': '1208800',     # First Commonwealth Financial
+        '712771': '3284117',     # ConnectOne Bancorp
+        '716605': '1010177',     # Penns Woods Bancorp
+        '721994': '1209746',     # Lakeland Financial
+        '723188': '1049660',     # Community Financial System
+        '726601': '1043845',     # Capital City Bank Group
+        '732417': '1244601',     # Hills Bancorporation
+        '737875': '1007014',     # First Keystone Corp
+        '739421': '1012446',     # Citizens Financial Services
+        '740663': '1211059',     # First of Long Island
+        '741516': '1009869',     # American National Bankshares
+        '743367': '1212316',     # Bar Harbor Bankshares
+        '750556': '1131787',     # SunTrust Banks
+        '750558': '1013269',     # QNB Corp
+        '750574': '1097627',     # Auburn National Bancorporation
+        '776901': '1252288',     # Independent Bank Corp MA
+        '796534': '1009760',     # National Bankshares
+        '803164': '1206965',     # ChoiceOne Financial
+        '811830': '3149899',     # Santander Holdings USA
+        '812348': '1207149',     # Century Bancorp
+        '826154': '2439941',     # Orrstown Financial
+        '836147': '1213476',     # Middlefield Banc
+        '842717': '3284136',     # Blue Ridge Bankshares
+        '846617': '2611679',     # Dime Community Bancshares
+        '846901': '2390356',     # Lakeland Bancorp
+        '854560': '1883532',     # Great Southern Bancorp
+        '855874': '2256426',     # Community Financial Corp MD
+        '862831': '1211363',     # Financial Institutions Inc
+        '868271': '3137755',     # Severn Bancorp
+        '879635': '2484576',     # Mid Penn Bancorp
+        '880641': '1213515',     # Eagle Financial Services
+        '887919': '2556644',     # Premier Financial Bancorp
+        '893847': '2168084',     # Hawthorn Bancshares
+        '913341': '1215178',     # C&F Financial
+        '932781': '2456177',     # First Community Corp SC
+        '944745': '2507512',     # Civista Bancshares
+        '1011659': '2489805',    # MUFG Americas Holdings
+        '1013272': '2434898',    # Norwood Financial
+        '1028734': '3026413',    # CoBiz Financial
+        '1030469': '3231609',    # OFG Bancorp
+        '1035092': '2256413',    # Shore Bancshares
+        '1035976': '1010312',    # FNCB Bancorp
+        '1038773': '2709320',    # SmartFinancial
+        '1056943': '2379429',    # Peoples Financial Services
+        '1058867': '3140267',    # Guaranty Bancshares TX
+        '1070154': '2944681',    # Sterling Bancorp
+        '1074902': '1208268',    # LCNB Corp
+        '1087456': '1212440',    # United Bancshares OH
+        '1090009': '2613965',    # Southern First Bancshares
+        '1093672': '1007126',    # Peoples Bancorp NC
+        '1094810': '1048666',    # MutualFirst Financial
+        '1102112': '3081495',    # PacWest Bancorp
+        '1109546': '3283957',    # Pacific Mercantile Bancorp
+        '1139812': '3185936',    # MB Financial
+        '1169770': '3514491',    # Banc of California
+        '1171825': '2950477',    # CIT Group
+        '1174850': '3284084',    # Nicolet Bankshares
+        '1227500': '3594217',    # Equity Bancshares
+        '1253317': '2944668',    # Old Line Bancshares
+        '1277902': '3494262',    # MVB Financial
+        '1315399': '3237752',    # Parke Bancorp
+        '1323648': '3283974',    # Community Bankers Trust
+        '1324410': '3378808',    # Guaranty Bancorp
+        '1336706': '3283966',    # Northpointe Bancshares
+        '1341317': '4055234',    # Bridgewater Bancshares
+        '1358356': '3488779',    # Limestone Bancorp
+        '1390162': '3568414',    # Howard Bancorp
+        '1401564': '3480740',    # First Financial Northwest
+        '1403475': '2679389',    # Bank of Marin Bancorp
+        '1407067': '4055303',    # Franklin Financial Network
+        '1409775': '3847048',    # BBVA USA Bancshares
+        '1412665': '2758613',    # MidWestOne Financial
+        '1412707': '3794776',    # Level One Bancorp
+        '1413837': '4129662',    # First Foundation
+        '1431567': '3284031',    # Oak Valley Bancorp
+        '1437479': '3283957',    # ENB Financial
+        '1458412': '4181609',    # CrossFirst Bankshares
+        '1461755': '4135638',    # Atlantic Capital Bancshares
+        '1466026': '3680542',    # Midland States Bancorp
+        '1470205': '2706035',    # County Bancorp
+        '1471265': '3485566',    # Northwest Bancshares
+        '1475348': '3499507',    # Luther Burbank Corp
+        '1476034': '4012137',    # Metropolitan Bank Holding
+        '1483195': '2608691',    # Oritani Financial
+        '1505732': '4035821',    # Bankwell Financial
+        '1521951': '2175389',    # First Business Financial
+        '1522420': '3495557',    # BSB Bancorp
+        '1562463': '3793782',    # First Internet Bancorp
+        '1587987': '4181606',    # NewtekOne
+        '1590799': '3821093',    # Riverview Financial
+        '1594012': '2978622',    # Investors Bancorp
+        '1600125': '3281363',    # Meridian Bancorp
+        '1601545': '4073792',    # Blue Hills Bancorp
+        '1602658': '3968866',    # Investar Holding
+        '1606363': '4106665',    # Green Bancorp
+        '1606440': '3848698',    # Reliant Bancorp
+        '1609951': '4135710',    # National Commerce Corp
+        '1613665': '4135698',    # Great Western Bancorp
+        '1624322': '4055264',    # Business First Bancshares
+        '1629019': '4062392',    # Merchants Bancorp
+        '1642081': '4055222',    # Allegiance Bancshares
+        '1676479': '4229084',    # CapStar Financial
+        '1702750': '4245959',    # Byline Bancorp
+        '1709442': '4312622',    # FirstSun Capital Bancorp
+        '1725872': '4476224',    # BM Technologies
+        '1730984': '4318696',    # BayCom Corp
+        '1746109': '3619569',    # Bank First Corp
+        '1746129': '4432193',    # Bank7 Corp
+        '1747068': '4493628',    # MetroCity Bankshares
+        '1750735': '3589413',    # Meridian Corp
+        '1769617': '4270569',    # HarborOne Bancorp
+        '1823608': '4488808',    # Amalgamated Financial
+        '1829576': '1240829',    # Carter Bankshares
+        '1964333': '390135',     # Burke & Herbert Financial
+    }
+
+
+def clean_bank_name(name):
+    """Normalize bank name for matching."""
+    if pd.isna(name):
+        return ''
+    
+    name = str(name).upper().strip()
+    
+    suffixes = [
+        ', INC.', ', INC', ' INC.', ' INC',
+        ', CORP.', ', CORP', ' CORP.', ' CORP',
+        ', CO.', ', CO', ' CO.', ' CO',
+        ' BANCORP', ' BANCSHARES', ' BANC',
+        ' FINANCIAL', ' HOLDINGS', ' GROUP',
+        ' N.A.', ' NA', '/DE/', '/DE', '/PA/', '/MD/', '/VA/', '/TX/',
+        '.', ',',
+    ]
+    
+    for suffix in suffixes:
+        name = name.replace(suffix, '')
+    
+    return ' '.join(name.split())
 
 
 # =============================================================================
 # DATA LOADING FUNCTIONS
 # =============================================================================
 
-def load_quarterly_ai_data(filepath):
-    """Load quarterly AI mentions from SEC filings (10-K and 10-Q)."""
+def load_ai_mentions(filepath):
+    """Load quarterly AI mentions from SEC 10-Q filings."""
     
+    print("\n" + "=" * 70)
+    print("LOADING AI MENTIONS DATA")
     print("=" * 70)
-    print("LOADING QUARTERLY AI MENTIONS DATA")
-    print("=" * 70)
     
-    df = pd.read_csv(filepath)
+    df = pd.read_csv(filepath, dtype={'cik': str})
     
-    # Standardize column names
-    if 'ticker' in df.columns and 'bank' not in df.columns:
-        df = df.rename(columns={'ticker': 'bank'})
+    # Standardize CIK
+    df['cik'] = df['cik'].astype(str).str.strip()
+    df['cik_clean'] = df['cik'].str.lstrip('0')
     
-    print(f"Observations: {len(df)}")
-    print(f"Banks: {df['bank'].nunique()}")
-    print(f"Quarters: {df['year_quarter'].nunique() if 'year_quarter' in df.columns else 'N/A'}")
-    
-    # Ensure year_quarter exists
+    # Create year_quarter if not exists
     if 'year_quarter' not in df.columns:
         if 'fiscal_year' in df.columns and 'fiscal_quarter' in df.columns:
             df['year_quarter'] = df['fiscal_year'].astype(str) + 'Q' + df['fiscal_quarter'].astype(str)
-        elif 'year' in df.columns and 'quarter' in df.columns:
-            df['year_quarter'] = df['year'].astype(str) + 'Q' + df['quarter'].astype(str)
     
-    # Ensure year column exists for control variable merging
+    # Ensure year column
     if 'year' not in df.columns:
         if 'fiscal_year' in df.columns:
             df['year'] = df['fiscal_year']
         elif 'year_quarter' in df.columns:
             df['year'] = df['year_quarter'].str[:4].astype(int)
     
-    print(f"\nTime Coverage: {df['year_quarter'].min()} to {df['year_quarter'].max()}")
+    print(f"Observations: {len(df)}")
+    print(f"Unique banks (CIK): {df['cik'].nunique()}")
+    print(f"Quarters: {df['year_quarter'].nunique()}")
+    print(f"Time range: {df['year_quarter'].min()} to {df['year_quarter'].max()}")
     
     return df
 
 
-def load_quarterly_financials(filepath):
-    """Load quarterly Fed/FFIEC financial data."""
+def load_ffiec_financials(filepath):
+    """Load quarterly FFIEC financial data."""
     
     print("\n" + "=" * 70)
-    print("LOADING QUARTERLY FED FINANCIALS")
+    print("LOADING FFIEC FINANCIAL DATA")
     print("=" * 70)
     
     df = pd.read_csv(filepath, dtype={'rssd_id': str})
+    df['rssd_id'] = df['rssd_id'].astype(str).str.strip()
     
-    print(f"Observations: {len(df)}")
-    print(f"Banks: {df['rssd_id'].nunique()}")
-    
-    # Ensure year_quarter exists
+    # Create year_quarter if needed
     if 'year_quarter' not in df.columns:
         if 'year' in df.columns and 'quarter' in df.columns:
             df['year_quarter'] = df['year'].astype(str) + 'Q' + df['quarter'].astype(str)
     
     # Ensure numeric types
     numeric_cols = ['tier1_ratio', 'roa_pct', 'roe_pct', 'ln_assets', 
-                    'total_assets', 'net_income_quarterly', 'total_equity']
+                    'total_assets', 'net_income', 'total_equity']
     
     for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='coerce')
     
-    # Summary
+    print(f"Observations: {len(df)}")
+    print(f"Unique banks (RSSD): {df['rssd_id'].nunique()}")
+    
+    # Coverage summary
     print("\nFinancial Variables Coverage:")
-    for col in ['tier1_ratio', 'roa_pct', 'roe_pct', 'ln_assets']:
+    for col in ['ln_assets', 'tier1_ratio', 'roa_pct', 'roe_pct']:
         if col in df.columns:
             valid = df[col].notna().sum()
             print(f"  {col}: {valid} ({100*valid/len(df):.1f}%)")
@@ -105,500 +375,293 @@ def load_quarterly_financials(filepath):
     return df
 
 
-def load_annual_controls(ceo_path=None, digital_path=None, panel_with_controls_path=None):
-    """
-    Load annual control variables (CEO age, digitalization).
-    These will be merged on (bank, year) and spread to all quarters.
-    """
+def load_ceo_age(filepath):
+    """Load CEO age data (annual)."""
     
     print("\n" + "=" * 70)
-    print("LOADING ANNUAL CONTROL VARIABLES")
+    print("LOADING CEO AGE DATA")
     print("=" * 70)
     
-    controls = {}
+    if not os.path.exists(filepath):
+        print(f"  File not found: {filepath}")
+        return None
     
-    # Option 1: Load from separate files
-    if ceo_path and os.path.exists(ceo_path):
-        ceo_df = pd.read_csv(ceo_path)
-        controls['ceo'] = ceo_df
-        print(f"CEO data: {len(ceo_df)} rows")
-        print(f"  Columns: {list(ceo_df.columns)}")
+    df = pd.read_csv(filepath, dtype={'cik': str})
+    df['cik'] = df['cik'].astype(str).str.strip()
+    df['cik_clean'] = df['cik'].str.lstrip('0')
     
-    if digital_path and os.path.exists(digital_path):
-        digital_df = pd.read_csv(digital_path)
-        controls['digital'] = digital_df
-        print(f"Digitalization data: {len(digital_df)} rows")
-        print(f"  Columns: {list(digital_df.columns)}")
+    # Ensure numeric
+    df['ceo_age'] = pd.to_numeric(df['ceo_age'], errors='coerce')
     
-    # Option 2: Load from existing panel with controls
-    if panel_with_controls_path and os.path.exists(panel_with_controls_path):
-        panel_df = pd.read_csv(panel_with_controls_path)
-        controls['panel'] = panel_df
-        print(f"Panel with controls: {len(panel_df)} rows")
-        
-        # Identify control variable columns
-        control_cols = []
-        for col in panel_df.columns:
-            if any(kw in col.lower() for kw in ['ceo', 'age', 'digital', 'index']):
-                control_cols.append(col)
-        print(f"  Control columns found: {control_cols}")
-    
-    return controls
-
-
-# =============================================================================
-# ID MAPPING FUNCTIONS
-# =============================================================================
-
-def create_cik_rssd_mapping():
-    """Create mapping from CIK to RSSD ID."""
-    
-    return {
-        # G-SIBs
-        '19617': '1039502',     # JPMorgan Chase
-        '70858': '1073757',     # Bank of America
-        '72971': '1120754',     # Wells Fargo
-        '831001': '1951350',    # Citigroup
-        '886982': '2380443',    # Goldman Sachs
-        '895421': '2162966',    # Morgan Stanley
-        '1390777': '3587146',   # Bank of New York Mellon
-        '93751': '1111435',     # State Street
-        
-        # Large Regional
-        '36104': '1119794',     # U.S. Bancorp
-        '713676': '1069778',    # PNC Financial
-        '92230': '1074156',     # Truist (BB&T)
-        '927628': '2277860',    # Capital One
-        '316709': '1026632',    # Charles Schwab
-        '35527': '1070345',     # Fifth Third
-        '91576': '1068025',     # KeyCorp
-        '1281761': '3242838',   # Regions Financial
-        '36270': '1037003',     # M&T Bank
-        '49196': '1068191',     # Huntington Bancshares
-        '73124': '1199611',     # Northern Trust
-        '759944': '1132449',    # Citizens Financial
-        
-        # Additional
-        '40729': '1562859',     # Ally Financial
-        '28412': '1199844',     # Comerica
-        '109380': '1027004',    # Zions
-        '1639737': '1075612',   # First Citizens
-        '36966': '1094640',     # First Horizon
-        '1069157': '2734233',   # East West Bancorp
-        '1212545': '3094569',   # Western Alliance
-        '1015328': '2855183',   # Wintrust
-        '719157': '2466727',    # Glacier Bancorp
-        '1098015': '2929531',   # Pinnacle Financial
-        '101382': '1010394',    # UMB Financial
-        '875357': '1883693',    # BOK Financial
-        '37808': '1070807',     # F.N.B. Corp
-        '18349': '1078846',     # Synovus
-        '910073': '2132932',    # NY Community Bancorp
-        '887343': '2078179',    # Columbia Banking
-        '18255': '1102367',     # Cullen/Frost
-        
-        # Credit Card / Payment
-        '4962': '1275216',      # American Express
-        '1393612': '3846375',   # Discover
-        '1601712': '3981856',   # Synchrony
-    }
-
-
-def create_name_rssd_mapping():
-    """Create mapping from bank name to RSSD ID."""
-    
-    return {
-        'jpmorgan chase': '1039502',
-        'bank of america': '1073757',
-        'wells fargo': '1120754',
-        'citigroup': '1951350',
-        'goldman sachs': '2380443',
-        'morgan stanley': '2162966',
-        'bank of new york mellon': '3587146',
-        'state street': '1111435',
-        'us bancorp': '1119794',
-        'u.s. bancorp': '1119794',
-        'pnc financial': '1069778',
-        'truist financial': '1074156',
-        'capital one': '2277860',
-        'charles schwab': '1026632',
-        'fifth third': '1070345',
-        'keycorp': '1068025',
-        'regions financial': '3242838',
-        'm&t bank': '1037003',
-        'mt bank': '1037003',
-        'huntington bancshares': '1068191',
-        'huntington': '1068191',
-        'northern trust': '1199611',
-        'citizens financial': '1132449',
-        'ally financial': '1562859',
-        'ally': '1562859',
-        'comerica': '1199844',
-        'zions': '1027004',
-        'first citizens': '1075612',
-        'first horizon': '1094640',
-        'east west': '2734233',
-        'western alliance': '3094569',
-        'american express': '1275216',
-        'discover financial': '3846375',
-        'synchrony': '3981856',
-    }
-
-
-def match_banks_to_rssd(df, cik_to_rssd, name_to_rssd):
-    """Match SEC AI data to Fed RSSD IDs."""
-    
-    print("\n" + "=" * 70)
-    print("MATCHING BANKS TO RSSD IDs")
-    print("=" * 70)
-    
-    df = df.copy()
-    df['rssd_id'] = None
-    
-    matched_cik = 0
-    matched_name = 0
-    unmatched = 0
-    
-    for idx in df.index:
-        # Try CIK first
-        cik = str(df.loc[idx, 'cik']).strip() if 'cik' in df.columns else ''
-        
-        if cik and cik in cik_to_rssd:
-            df.loc[idx, 'rssd_id'] = cik_to_rssd[cik]
-            matched_cik += 1
-            continue
-        
-        # Fall back to name matching
-        bank_name = str(df.loc[idx, 'bank']).lower().strip()
-        bank_name = ''.join(c if c.isalnum() or c.isspace() else ' ' for c in bank_name)
-        bank_name = ' '.join(bank_name.split())
-        
-        if bank_name in name_to_rssd:
-            df.loc[idx, 'rssd_id'] = name_to_rssd[bank_name]
-            matched_name += 1
-            continue
-        
-        # Try partial match
-        words = bank_name.split()
-        matched = False
-        for n in [3, 2, 1]:
-            if len(words) >= n:
-                partial = ' '.join(words[:n])
-                if partial in name_to_rssd:
-                    df.loc[idx, 'rssd_id'] = name_to_rssd[partial]
-                    matched_name += 1
-                    matched = True
-                    break
-        
-        if not matched:
-            unmatched += 1
-    
-    print(f"Matched via CIK: {matched_cik}")
-    print(f"Matched via name: {matched_name}")
-    print(f"Unmatched: {unmatched}")
-    print(f"Match rate: {100*(matched_cik + matched_name)/len(df):.1f}%")
+    print(f"Observations: {len(df)}")
+    print(f"Unique banks: {df['cik'].nunique()}")
+    print(f"Years: {df['year'].min()} to {df['year'].max()}")
+    print(f"Mean CEO age: {df['ceo_age'].mean():.1f}")
     
     return df
+
+
+def load_digitalization(filepath_quarterly, filepath_annual=None):
+    """
+    Load digitalization index data.
+    
+    Priority:
+    1. Quarterly data from 10-Q (preferred for 2025 Q1/Q2)
+    2. Annual data from 10-K (fallback)
+    """
+    
+    print("\n" + "=" * 70)
+    print("LOADING DIGITALIZATION INDEX DATA")
+    print("=" * 70)
+    
+    df = None
+    is_quarterly = False
+    
+    # Try quarterly first (from 10-Q)
+    if os.path.exists(filepath_quarterly):
+        print(f"  Loading QUARTERLY data from 10-Q...")
+        df = pd.read_csv(filepath_quarterly, dtype={'cik': str})
+        is_quarterly = True
+        print(f"  ✓ Found quarterly digitalization data")
+    elif filepath_annual and os.path.exists(filepath_annual):
+        print(f"  Quarterly not found, loading ANNUAL data from 10-K...")
+        df = pd.read_csv(filepath_annual, dtype={'cik': str})
+        is_quarterly = False
+        print(f"  ✓ Found annual digitalization data")
+    else:
+        print(f"  No digitalization data found")
+        return None, False
+    
+    df['cik'] = df['cik'].astype(str).str.strip()
+    df['cik_clean'] = df['cik'].str.lstrip('0')
+    
+    # Standardize year column name
+    if 'fiscal_year' in df.columns and 'year' not in df.columns:
+        df['year'] = df['fiscal_year']
+    
+    # Ensure numeric
+    df['digital_index'] = pd.to_numeric(df['digital_index'], errors='coerce')
+    
+    print(f"  Observations: {len(df)}")
+    print(f"  Unique banks: {df['cik'].nunique()}")
+    print(f"  Mean digital index: {df['digital_index'].mean():.3f}")
+    
+    if is_quarterly:
+        print(f"  Year-quarters: {df['year_quarter'].nunique()}")
+    
+    return df, is_quarterly
 
 
 # =============================================================================
 # MERGE FUNCTIONS
 # =============================================================================
 
-def merge_with_fed_financials(ai_df, fed_df):
-    """Merge AI data with Fed financials at quarterly level."""
+def build_cik_rssd_mapping(ai_df, ffiec_df, paths):
+    """Build comprehensive CIK → RSSD mapping."""
     
     print("\n" + "=" * 70)
-    print("MERGING AI DATA WITH FED FINANCIALS (QUARTERLY)")
+    print("BUILDING CIK-RSSD MAPPING")
     print("=" * 70)
     
+    # Start with manual mappings
+    cik_to_rssd = get_manual_cik_rssd_mapping()
+    print(f"Manual mappings: {len(cik_to_rssd)}")
+    
+    # Load enhanced mapping file if exists
+    mapping_path = paths.get('cik_rssd_mapping')
+    if mapping_path and os.path.exists(mapping_path):
+        df_map = pd.read_csv(mapping_path, dtype={'cik': str, 'rssd_id': str})
+        added = 0
+        for _, row in df_map.iterrows():
+            cik = str(row['cik']).strip().lstrip('0')
+            rssd = str(row['rssd_id']).strip()
+            if cik and rssd and rssd != 'nan' and cik not in cik_to_rssd:
+                cik_to_rssd[cik] = rssd
+                added += 1
+        print(f"From mapping file: +{added} mappings")
+    
+    print(f"Total mappings: {len(cik_to_rssd)}")
+    
+    return cik_to_rssd
+
+
+def merge_data(ai_df, ffiec_df, ceo_df, digital_df, digital_is_quarterly, cik_to_rssd):
+    """
+    Merge all data sources into quarterly panel.
+    
+    Merge strategy:
+    1. Map AI mentions CIK → RSSD
+    2. Merge FFIEC financials on (rssd_id, year_quarter) - QUARTERLY
+    3. Merge CEO age on (cik, year) - spread to all quarters (ANNUAL)
+    4. Merge digitalization:
+       - If quarterly (10-Q): merge on (cik, year_quarter) - QUARTERLY
+       - If annual (10-K): merge on (cik, year) - spread to quarters
+    """
+    
+    print("\n" + "=" * 70)
+    print("MERGING DATA SOURCES")
+    print("=" * 70)
+    
+    # Step 1: Add RSSD to AI data
     ai_df = ai_df.copy()
-    fed_df = fed_df.copy()
+    ai_df['rssd_id'] = ai_df['cik_clean'].map(cik_to_rssd)
     
-    ai_df['rssd_id'] = ai_df['rssd_id'].astype(str)
-    fed_df['rssd_id'] = fed_df['rssd_id'].astype(str)
+    mapped = ai_df['rssd_id'].notna().sum()
+    total = len(ai_df)
+    print(f"\nCIK → RSSD mapping:")
+    print(f"  Mapped: {mapped}/{total} ({100*mapped/total:.1f}%)")
+    print(f"  Unique banks mapped: {ai_df[ai_df['rssd_id'].notna()]['rssd_id'].nunique()}")
     
-    # Columns to merge from Fed data
-    fed_cols = ['rssd_id', 'year_quarter', 'tier1_ratio', 'roa_pct', 'roe_pct', 
-                'ln_assets', 'total_assets', 'total_equity', 'net_income_quarterly',
-                'bank_name']
-    fed_cols = [c for c in fed_cols if c in fed_df.columns]
+    # Keep only mapped observations
+    panel = ai_df[ai_df['rssd_id'].notna()].copy()
     
-    # Merge on rssd_id and year_quarter (QUARTERLY merge)
-    merged = ai_df.merge(
-        fed_df[fed_cols],
+    # Step 2: Merge FFIEC financials (quarterly)
+    print(f"\nMerging FFIEC financials on (rssd_id, year_quarter)...")
+    
+    # Select columns from FFIEC
+    ffiec_cols = ['rssd_id', 'year_quarter', 'ln_assets', 'tier1_ratio', 
+                  'roa_pct', 'roe_pct', 'total_assets', 'total_equity']
+    ffiec_merge = ffiec_df[[c for c in ffiec_cols if c in ffiec_df.columns]].copy()
+    
+    panel = panel.merge(
+        ffiec_merge,
         on=['rssd_id', 'year_quarter'],
-        how='left'
+        how='left',
+        suffixes=('', '_ffiec')
     )
     
-    print(f"AI observations: {len(ai_df)}")
-    print(f"Fed observations: {len(fed_df)}")
-    print(f"Merged observations: {len(merged)}")
+    ffiec_matched = panel['ln_assets'].notna().sum()
+    print(f"  With FFIEC data: {ffiec_matched}/{len(panel)} ({100*ffiec_matched/len(panel):.1f}%)")
     
-    # Coverage
-    print(f"\nFinancial Variable Coverage:")
-    for col in ['tier1_ratio', 'roa_pct', 'roe_pct', 'ln_assets']:
-        if col in merged.columns:
-            valid = merged[col].notna().sum()
-            pct = 100 * valid / len(merged)
-            print(f"  {col}: {valid}/{len(merged)} ({pct:.1f}%)")
-    
-    return merged
-
-
-def merge_annual_controls_to_quarterly(quarterly_df, controls_dict, merge_key='rssd_id'):
-    """
-    Merge annual control variables into quarterly panel.
-    
-    KEY INSIGHT: By merging on (bank, year) instead of (bank, year_quarter),
-    the annual values are automatically spread to all quarters of that year.
-    """
-    
-    print("\n" + "=" * 70)
-    print("MERGING ANNUAL CONTROLS → QUARTERLY (SPREADING)")
-    print("=" * 70)
-    
-    df = quarterly_df.copy()
-    
-    # Ensure year column exists
-    if 'year' not in df.columns:
-        df['year'] = df['year_quarter'].str[:4].astype(int)
-    
-    # Option 1: Use existing panel with controls
-    if 'panel' in controls_dict and controls_dict['panel'] is not None:
-        panel_controls = controls_dict['panel']
+    # Step 3: Merge CEO age (annual → spread to quarters)
+    if ceo_df is not None:
+        print(f"\nMerging CEO age on (cik, year) - annual spread to quarters...")
         
-        # Identify control columns
-        control_cols = []
-        for col in panel_controls.columns:
-            if any(kw in col.lower() for kw in ['ceo', 'age', 'digital', 'index', 'tenure']):
-                if col not in df.columns:
-                    control_cols.append(col)
+        ceo_cols = ['cik_clean', 'year', 'ceo_name', 'ceo_age']
+        ceo_merge = ceo_df[[c for c in ceo_cols if c in ceo_df.columns]].copy()
         
-        if control_cols:
-            # Determine merge key
-            if merge_key in panel_controls.columns:
-                merge_on = merge_key
-            elif 'bank' in panel_controls.columns:
-                merge_on = 'bank'
-            else:
-                print("  WARNING: No valid merge key found in controls panel")
-                return df
+        panel = panel.merge(
+            ceo_merge,
+            on=['cik_clean', 'year'],
+            how='left'
+        )
+        
+        ceo_matched = panel['ceo_age'].notna().sum()
+        print(f"  With CEO age: {ceo_matched}/{len(panel)} ({100*ceo_matched/len(panel):.1f}%)")
+    
+    # Step 4: Merge digitalization index
+    if digital_df is not None:
+        if digital_is_quarterly:
+            # Quarterly data from 10-Q - merge on (cik, year_quarter)
+            print(f"\nMerging QUARTERLY digitalization on (cik, year_quarter)...")
             
-            # Determine year column
-            year_col = 'year' if 'year' in panel_controls.columns else 'fiscal_year'
-            if year_col not in panel_controls.columns:
-                print("  WARNING: No year column found in controls panel")
-                return df
+            dig_cols = ['cik_clean', 'year_quarter', 'digital_index']
+            if 'digital_intensity' in digital_df.columns:
+                dig_cols.append('digital_intensity')
+            dig_merge = digital_df[[c for c in dig_cols if c in digital_df.columns]].copy()
             
-            # Prepare controls for merge
-            controls_for_merge = panel_controls[[merge_on, year_col] + control_cols].copy()
-            controls_for_merge = controls_for_merge.rename(columns={year_col: 'year'})
-            controls_for_merge = controls_for_merge.drop_duplicates(subset=[merge_on, 'year'])
+            panel = panel.merge(
+                dig_merge,
+                on=['cik_clean', 'year_quarter'],
+                how='left'
+            )
+        else:
+            # Annual data from 10-K - merge on (cik, year) and spread to quarters
+            print(f"\nMerging ANNUAL digitalization on (cik, year) - spread to quarters...")
             
-            # Merge on (bank/rssd_id, year) - spreads to all quarters
-            df = df.merge(controls_for_merge, on=[merge_on, 'year'], how='left')
+            dig_cols = ['cik_clean', 'year', 'digital_index']
+            if 'digital_intensity' in digital_df.columns:
+                dig_cols.append('digital_intensity')
+            dig_merge = digital_df[[c for c in dig_cols if c in digital_df.columns]].copy()
             
-            print(f"  Merged controls: {control_cols}")
-            for col in control_cols:
-                if col in df.columns:
-                    valid = df[col].notna().sum()
-                    print(f"    {col}: {valid}/{len(df)} ({100*valid/len(df):.1f}%)")
+            panel = panel.merge(
+                dig_merge,
+                on=['cik_clean', 'year'],
+                how='left'
+            )
+        
+        dig_matched = panel['digital_index'].notna().sum()
+        print(f"  With digitalization: {dig_matched}/{len(panel)} ({100*dig_matched/len(panel):.1f}%)")
     
-    # Option 2: Merge CEO data separately
-    if 'ceo' in controls_dict and controls_dict['ceo'] is not None:
-        ceo_df = controls_dict['ceo']
-        
-        age_col = next((col for col in ceo_df.columns if 'age' in col.lower()), None)
-        
-        if age_col:
-            ceo_merge_key = merge_key if merge_key in ceo_df.columns else 'bank'
-            if ceo_merge_key in ceo_df.columns:
-                year_col = 'year' if 'year' in ceo_df.columns else 'fiscal_year'
-                
-                ceo_for_merge = ceo_df[[ceo_merge_key, year_col, age_col]].copy()
-                ceo_for_merge = ceo_for_merge.rename(columns={year_col: 'year', age_col: 'ceo_age'})
-                ceo_for_merge = ceo_for_merge.drop_duplicates(subset=[ceo_merge_key, 'year'])
-                
-                df = df.merge(ceo_for_merge, on=[ceo_merge_key, 'year'], how='left')
-                
-                valid = df['ceo_age'].notna().sum()
-                print(f"  CEO age: {valid}/{len(df)} ({100*valid/len(df):.1f}%)")
-    
-    # Option 3: Merge digitalization data separately  
-    if 'digital' in controls_dict and controls_dict['digital'] is not None:
-        digital_df = controls_dict['digital']
-        
-        digital_col = next((col for col in digital_df.columns if 'digital' in col.lower() and 'index' in col.lower()), None)
-        if not digital_col:
-            digital_col = next((col for col in digital_df.columns if 'digital' in col.lower()), None)
-        
-        if digital_col:
-            digital_merge_key = merge_key if merge_key in digital_df.columns else 'bank'
-            if digital_merge_key in digital_df.columns:
-                year_col = 'year' if 'year' in digital_df.columns else 'fiscal_year'
-                
-                cols_to_merge = [digital_merge_key, year_col, digital_col]
-                for col in digital_df.columns:
-                    if col.startswith('dig_') and col not in cols_to_merge:
-                        cols_to_merge.append(col)
-                
-                digital_for_merge = digital_df[cols_to_merge].copy()
-                digital_for_merge = digital_for_merge.rename(columns={year_col: 'year'})
-                digital_for_merge = digital_for_merge.drop_duplicates(subset=[digital_merge_key, 'year'])
-                
-                df = df.merge(digital_for_merge, on=[digital_merge_key, 'year'], how='left')
-                
-                valid = df[digital_col].notna().sum()
-                print(f"  {digital_col}: {valid}/{len(df)} ({100*valid/len(df):.1f}%)")
-    
-    return df
+    return panel
 
 
 # =============================================================================
-# SPATIAL FUNCTIONS
+# TREATMENT AND CONTROL VARIABLES
 # =============================================================================
 
-def create_quarterly_w_matrix(df, output_path=None):
-    """Create spatial weight matrix based on asset size similarity."""
+def create_treatment_variables(panel):
+    """Create treatment variables for SDID/DSDM estimation."""
     
     print("\n" + "=" * 70)
-    print("CREATING SPATIAL WEIGHT MATRIX")
+    print("CREATING TREATMENT VARIABLES")
     print("=" * 70)
     
-    bank_sizes = df.groupby('rssd_id')['ln_assets'].mean()
-    bank_sizes = bank_sizes.dropna()
-    banks = list(bank_sizes.index)
-    n = len(banks)
+    panel = panel.copy()
     
-    print(f"Banks in W matrix: {n}")
+    # Ensure quarter column
+    if 'quarter' not in panel.columns:
+        if 'fiscal_quarter' in panel.columns:
+            panel['quarter'] = panel['fiscal_quarter']
+        elif 'year_quarter' in panel.columns:
+            panel['quarter'] = panel['year_quarter'].str[-1].astype(int)
     
-    W = np.zeros((n, n))
+    # AI adoption indicators
+    ai_col = 'total_ai_mentions' if 'total_ai_mentions' in panel.columns else 'ai_mentions'
+    genai_col = 'genai_mentions' if 'genai_mentions' in panel.columns else None
     
-    for i, bank_i in enumerate(banks):
-        for j, bank_j in enumerate(banks):
-            if i != j:
-                size_i = bank_sizes[bank_i]
-                size_j = bank_sizes[bank_j]
-                W[i, j] = np.exp(-abs(size_i - size_j))
+    if ai_col in panel.columns:
+        panel['ai_adopted'] = (panel[ai_col] > 0).astype(int)
+        print(f"AI adoption rate: {panel['ai_adopted'].mean():.1%}")
     
-    row_sums = W.sum(axis=1, keepdims=True)
-    row_sums[row_sums == 0] = 1
-    W = W / row_sums
+    if genai_col and genai_col in panel.columns:
+        panel['genai_adopted'] = (panel[genai_col] > 0).astype(int)
+        print(f"GenAI adoption rate: {panel['genai_adopted'].mean():.1%}")
     
-    if output_path:
-        W_df = pd.DataFrame(W, index=banks, columns=banks)
-        W_df.to_csv(output_path)
-        print(f"✓ Saved W matrix: {output_path}")
+    # Post-ChatGPT indicator (ChatGPT launched Nov 2022 → 2022Q4+)
+    panel['post_chatgpt'] = (
+        (panel['year'] > 2022) | 
+        ((panel['year'] == 2022) & (panel['quarter'] >= 4))
+    ).astype(int)
     
-    return W, banks
-
-
-def calculate_spatial_lags(df, W, banks, variables=['D_genai', 'roa_pct']):
-    """Calculate spatial lags for specified variables."""
-    
-    print("\n" + "=" * 70)
-    print("CALCULATING SPATIAL LAGS")
-    print("=" * 70)
-    
-    df = df.copy()
-    bank_to_idx = {bank: i for i, bank in enumerate(banks)}
-    n = len(banks)
-    
-    df_spatial = df[df['rssd_id'].isin(banks)].copy()
-    
-    for var in variables:
-        if var not in df_spatial.columns:
-            print(f"  Skipping {var} (not in data)")
-            continue
-        
-        df_spatial[f'W_{var}'] = np.nan
-        
-        for year_quarter in df_spatial['year_quarter'].unique():
-            period_mask = df_spatial['year_quarter'] == year_quarter
-            
-            vec = np.zeros(n)
-            for _, row in df_spatial[period_mask].iterrows():
-                if row['rssd_id'] in bank_to_idx:
-                    idx = bank_to_idx[row['rssd_id']]
-                    val = row[var]
-                    vec[idx] = val if pd.notna(val) else 0
-            
-            W_vec = W @ vec
-            
-            for idx_row in df_spatial[period_mask].index:
-                rssd = df_spatial.loc[idx_row, 'rssd_id']
-                if rssd in bank_to_idx:
-                    bank_idx = bank_to_idx[rssd]
-                    df_spatial.loc[idx_row, f'W_{var}'] = W_vec[bank_idx]
-        
-        valid = df_spatial[f'W_{var}'].notna().sum()
-        print(f"  W_{var}: {valid} valid observations")
-    
-    return df_spatial
-
-
-def create_dsdm_variables(df):
-    """Create treatment and control variables for DSDM estimation."""
-    
-    print("\n" + "=" * 70)
-    print("CREATING DSDM VARIABLES")
-    print("=" * 70)
-    
-    df = df.copy()
-    
-    # Ensure quarter column exists
-    if 'quarter' not in df.columns:
-        if 'fiscal_quarter' in df.columns:
-            df['quarter'] = df['fiscal_quarter']
-        elif 'year_quarter' in df.columns:
-            df['quarter'] = df['year_quarter'].str[-1].astype(int)
-    
-    # Ensure year column exists
-    if 'year' not in df.columns:
-        if 'fiscal_year' in df.columns:
-            df['year'] = df['fiscal_year']
-        elif 'year_quarter' in df.columns:
-            df['year'] = df['year_quarter'].str[:4].astype(int)
-    
-    # Binary treatment indicator
-    if 'D_genai' not in df.columns:
-        for col in ['genai_mentions', 'total_ai_mentions', 'ai_mentions']:
-            if col in df.columns:
-                df['D_genai'] = (df[col] > 0).astype(int)
-                break
-    
-    # Post-ChatGPT indicator (Nov 2022 → affects 2022Q4+)
-    df['post_chatgpt'] = ((df['year'] > 2022) | 
-                          ((df['year'] == 2022) & (df['quarter'] >= 4))).astype(int)
+    print(f"Post-ChatGPT observations: {panel['post_chatgpt'].sum()}")
     
     # Treatment interaction
-    if 'D_genai' in df.columns:
-        df['genai_x_post'] = df['D_genai'] * df['post_chatgpt']
+    if 'genai_adopted' in panel.columns:
+        panel['genai_x_post'] = panel['genai_adopted'] * panel['post_chatgpt']
     
-    # Lagged dependent variable
-    df = df.sort_values(['rssd_id', 'year', 'quarter'])
+    # Size quartiles based on average ln_assets
+    if 'ln_assets' in panel.columns:
+        avg_size = panel.groupby('rssd_id')['ln_assets'].transform('mean')
+        panel['size_quartile'] = pd.qcut(
+            avg_size, q=4, labels=['Q1_Small', 'Q2', 'Q3', 'Q4_Large'],
+            duplicates='drop'
+        )
+        panel['is_large_bank'] = (panel['size_quartile'] == 'Q4_Large').astype(int)
+    
+    # Lagged dependent variables
+    panel = panel.sort_values(['rssd_id', 'year', 'quarter'])
     
     for var in ['roa_pct', 'roe_pct', 'ln_assets']:
-        if var in df.columns:
-            df[f'{var}_lag1'] = df.groupby('rssd_id')[var].shift(1)
+        if var in panel.columns:
+            panel[f'{var}_lag1'] = panel.groupby('rssd_id')[var].shift(1)
     
     # Time trend
-    df = df.sort_values(['year', 'quarter'])
-    periods = sorted(df['year_quarter'].unique())
+    panel = panel.sort_values(['year', 'quarter'])
+    periods = sorted(panel['year_quarter'].unique())
     period_to_t = {p: i+1 for i, p in enumerate(periods)}
-    df['time_trend'] = df['year_quarter'].map(period_to_t)
+    panel['time_trend'] = panel['year_quarter'].map(period_to_t)
     
-    # Summary
-    print(f"Treatment Variable Summary:")
-    print(f"  Post-ChatGPT (2022Q4+): {df['post_chatgpt'].sum()} observations")
+    return panel
+
+
+def create_balanced_panel(panel, min_quarters):
+    """Create balanced panel with minimum quarters threshold."""
     
-    if 'D_genai' in df.columns:
-        print(f"\nGenAI Adoption Rate by Quarter (last 12):")
-        adoption_by_period = df.groupby('year_quarter')['D_genai'].mean()
-        print(adoption_by_period.tail(12).round(3))
+    quarters_per_bank = panel.groupby('rssd_id').size()
+    qualified_banks = quarters_per_bank[quarters_per_bank >= min_quarters].index.tolist()
     
-    return df
+    return panel[panel['rssd_id'].isin(qualified_banks)].copy()
 
 
 # =============================================================================
@@ -606,114 +669,97 @@ def create_dsdm_variables(df):
 # =============================================================================
 
 def main():
-    """Main function to build final quarterly DSDM panel."""
+    """Build the quarterly estimation panel with all control variables."""
     
     print("=" * 70)
-    print("BUILDING QUARTERLY DSDM PANEL WITH CONTROL VARIABLES")
+    print("BUILDING QUARTERLY ESTIMATION PANEL")
     print("=" * 70)
+    print(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("""
-    Panel Structure: Bank-Quarter observations
-    
-    Merge Strategy:
-    - AI + Financials: Merge on (rssd_id, year_quarter)
-    - Controls: Merge on (rssd_id, year) → spreads to all quarters
+    Control Variables:
+    - ln_assets: Log total assets (quarterly, FFIEC)
+    - tier1_ratio: Tier 1 capital ratio (quarterly, FFIEC)
+    - ceo_age: CEO age in years (annual, SEC-API.io)
+    - digital_index: Digitalization z-score (annual, 10-K keywords)
     """)
     
-    # Paths
-    script_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in dir() else '.'
-    project_root = os.path.dirname(script_dir) if script_dir != '.' else '.'
-    
-    # Input files
-    ai_path = os.path.join(project_root, "data", "raw", "10q_ai_mentions_quarterly.csv")
-    fed_path = os.path.join(project_root, "data", "processed", "fed_financials_quarterly.csv")
-    
-    # Control variable paths
-    ceo_path = os.path.join(project_root, "data", "raw", "ceo_age_data.csv")
-    digital_path = os.path.join(project_root, "data", "processed", "digitalization_index.csv")
-    panel_controls_path = os.path.join(project_root, "data", "processed", "dsdm_panel_with_controls.csv")
-    
-    # Output
-    output_path = os.path.join(project_root, "data", "processed", "dsdm_panel_quarterly.csv")
-    w_path = os.path.join(project_root, "data", "processed", "W_quarterly.csv")
+    # Get paths
+    paths = get_paths()
     
     # Check required files
-    if not os.path.exists(ai_path):
-        print(f"\n⚠ AI data not found: {ai_path}")
-        print("Please run: python code/extract_10q_ai_mentions_revised.py")
-        return None
+    required = ['ai_mentions', 'ffiec_financials']
+    for key in required:
+        if not os.path.exists(paths[key]):
+            print(f"\n✗ Missing required file: {paths[key]}")
+            return None
     
-    if not os.path.exists(fed_path):
-        print(f"\n⚠ Fed financials not found: {fed_path}")
-        print("Please run: python code/process_ffiec_quarterly.py")
-        return None
-    
-    # Step 1: Load AI data
-    ai_df = load_quarterly_ai_data(ai_path)
-    
-    # Step 2: Load Fed financials
-    fed_df = load_quarterly_financials(fed_path)
-    
-    # Step 3: Load control variables
-    controls = load_annual_controls(
-        ceo_path=ceo_path if os.path.exists(ceo_path) else None,
-        digital_path=digital_path if os.path.exists(digital_path) else None,
-        panel_with_controls_path=panel_controls_path if os.path.exists(panel_controls_path) else None
+    # Load all data
+    ai_df = load_ai_mentions(paths['ai_mentions'])
+    ffiec_df = load_ffiec_financials(paths['ffiec_financials'])
+    ceo_df = load_ceo_age(paths['ceo_age'])
+    digital_df, digital_is_quarterly = load_digitalization(
+        paths['digitalization_quarterly'],
+        paths['digitalization_annual']
     )
     
-    # Step 4: Match banks to RSSD
-    cik_to_rssd = create_cik_rssd_mapping()
-    name_to_rssd = create_name_rssd_mapping()
-    ai_df = match_banks_to_rssd(ai_df, cik_to_rssd, name_to_rssd)
+    # Build CIK-RSSD mapping
+    cik_to_rssd = build_cik_rssd_mapping(ai_df, ffiec_df, paths)
     
-    # Step 5: Merge with Fed financials (quarterly)
-    panel = merge_with_fed_financials(ai_df, fed_df)
+    # Merge all data
+    panel = merge_data(ai_df, ffiec_df, ceo_df, digital_df, digital_is_quarterly, cik_to_rssd)
     
-    # Step 6: Merge annual controls → spread to quarters
-    if controls:
-        panel = merge_annual_controls_to_quarterly(panel, controls, merge_key='rssd_id')
+    # Create treatment variables
+    panel = create_treatment_variables(panel)
     
-    # Step 7: Create W matrix and spatial lags
-    W, banks = create_quarterly_w_matrix(panel, w_path)
-    panel = calculate_spatial_lags(panel, W, banks)
+    # Save full panel
+    os.makedirs(os.path.dirname(paths['output_full']), exist_ok=True)
+    panel.to_csv(paths['output_full'], index=False)
+    print(f"\n✓ Saved full panel: {paths['output_full']}")
     
-    # Step 8: Create DSDM variables
-    panel = create_dsdm_variables(panel)
-    
-    # Step 9: Save
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    panel.to_csv(output_path, index=False)
+    # Create and save balanced panel
+    panel_balanced = create_balanced_panel(panel, CONFIG['min_quarters_balanced'])
+    panel_balanced.to_csv(paths['output_balanced'], index=False)
+    print(f"✓ Saved balanced panel: {paths['output_balanced']}")
     
     # Final Summary
     print("\n" + "=" * 70)
-    print("FINAL QUARTERLY PANEL SUMMARY")
+    print("FINAL PANEL SUMMARY")
     print("=" * 70)
     
-    print(f"\nPanel Dimensions:")
-    print(f"  Observations: {len(panel)}")
+    print(f"\nFull Panel:")
+    print(f"  Observations: {len(panel):,}")
     print(f"  Banks (N): {panel['rssd_id'].nunique()}")
     print(f"  Quarters (T): {panel['year_quarter'].nunique()}")
+    print(f"  Time range: {panel['year_quarter'].min()} to {panel['year_quarter'].max()}")
     
-    print(f"\nTime Coverage:")
-    print(f"  First: {panel['year_quarter'].min()}")
-    print(f"  Last: {panel['year_quarter'].max()}")
+    print(f"\nBalanced Panel (≥{CONFIG['min_quarters_balanced']} quarters):")
+    print(f"  Observations: {len(panel_balanced):,}")
+    print(f"  Banks: {panel_balanced['rssd_id'].nunique()}")
     
-    print(f"\nVariable Coverage:")
-    key_vars = ['D_genai', 'roa_pct', 'roe_pct', 'tier1_ratio', 'ln_assets',
-                'W_D_genai', 'W_roa_pct', 'roa_pct_lag1', 'ceo_age', 'digital_index']
-    for var in key_vars:
+    print(f"\nControl Variables Coverage (Full Panel):")
+    control_vars = ['ln_assets', 'tier1_ratio', 'ceo_age', 'digital_index']
+    for var in control_vars:
         if var in panel.columns:
             valid = panel[var].notna().sum()
-            print(f"  {var}: {valid}/{len(panel)} ({100*valid/len(panel):.1f}%)")
+            print(f"  {var}: {valid:,}/{len(panel):,} ({100*valid/len(panel):.1f}%)")
     
-    print(f"\n✓ Saved: {output_path}")
-    print(f"✓ Saved: {w_path}")
+    print(f"\nOther Variables Coverage:")
+    other_vars = ['roa_pct', 'roe_pct', 'ai_adopted', 'genai_adopted', 'post_chatgpt']
+    for var in other_vars:
+        if var in panel.columns:
+            valid = panel[var].notna().sum()
+            print(f"  {var}: {valid:,}/{len(panel):,} ({100*valid/len(panel):.1f}%)")
     
-    # Power comparison
-    annual_equiv = panel[['rssd_id', 'year']].drop_duplicates()
-    print(f"\n--- Power Comparison ---")
-    print(f"  Quarterly: {len(panel)} obs")
-    print(f"  Annual equiv: {len(annual_equiv)} obs")
-    print(f"  Power multiplier: {len(panel)/max(len(annual_equiv),1):.1f}x")
+    # Control group analysis
+    if 'ai_adopted' in panel.columns:
+        print(f"\nControl Group (Never AI Mention):")
+        never_ai = panel.groupby('rssd_id')['ai_adopted'].max()
+        n_control = (never_ai == 0).sum()
+        print(f"  Banks that never mention AI: {n_control}")
+    
+    print("\n" + "=" * 70)
+    print("COMPLETE")
+    print("=" * 70)
     
     return panel
 

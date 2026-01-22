@@ -1,282 +1,253 @@
 #!/bin/bash
-# =============================================================================
-# DIRECTORY REORGANIZATION SCRIPT
-# =============================================================================
-# This script reorganizes the genai_adoption_panel project to keep only
-# essential scripts for the quarterly panel workflow.
-#
-# Run from project root: bash reorganize_project.sh
-# =============================================================================
+# ============================================================================
+# Reorganize GenAI Banking Productivity Project
+# ============================================================================
+# Run this script from the project root directory:
+#   chmod +x reorganize_project.sh
+#   ./reorganize_project.sh
+# ============================================================================
+
+set -e  # Exit on error
 
 echo "=============================================="
-echo "REORGANIZING PROJECT DIRECTORY"
+echo "REORGANIZING PROJECT STRUCTURE"
 echo "=============================================="
 
-# Create new directory structure
-echo "Creating new directory structure..."
-
-mkdir -p code/core           # Essential pipeline scripts
-mkdir -p code/analysis       # DSDM and SDID estimation
-mkdir -p code/utils          # Helper functions
-mkdir -p code/archive        # Deprecated scripts (for reference)
-
-mkdir -p data/raw/ffiec
-mkdir -p data/raw/sec_edgar
-mkdir -p data/raw/crosswalk
-mkdir -p data/processed
-mkdir -p data/interim        # Intermediate files
-
+# Create directories if they don't exist
+echo ""
+echo "Step 1: Creating directory structure..."
+mkdir -p code/core
+mkdir -p code/analysis
+mkdir -p code/utils
+mkdir -p code/archive
+mkdir -p docs
 mkdir -p output/tables
 mkdir -p output/figures
-mkdir -p docs
 
-# =============================================================================
-# CORE PIPELINE SCRIPTS (code/core/)
-# =============================================================================
-echo "Moving core pipeline scripts..."
+# ============================================================================
+# Step 2: Move old scripts to archive
+# ============================================================================
+echo ""
+echo "Step 2: Moving old scripts to archive..."
 
-# Step 1: Bank Discovery
-if [ -f "code/sec_edgar_download_fixed.py" ]; then
-    cp code/sec_edgar_download_fixed.py code/core/01_sec_bank_discovery.py
-elif [ -f "code/sec_edgar_download.py" ]; then
-    cp code/sec_edgar_download.py code/core/01_sec_bank_discovery.py
+# Move duplicate/old panel builders
+mv -f code/build_quarterly_dsdm_panel_v2.py code/archive/ 2>/dev/null || true
+mv -f code/build_quarterly_dsdm_panel_v3.py code/archive/ 2>/dev/null || true
+mv -f code/build_estimation_sample.py code/archive/ 2>/dev/null || true
+
+# Move old CEO age extractors
+mv -f code/ceo_age_extractor_revised.py code/archive/ 2>/dev/null || true
+
+# Move old digitalization extractors
+mv -f code/digitalization_extraction_revised.py code/archive/ 2>/dev/null || true
+mv -f code/digitalization_extraction.py code/archive/ 2>/dev/null || true
+
+# Move old process scripts
+mv -f code/process_ffiec_quarterly.py code/archive/ 2>/dev/null || true
+
+# Move duplicate analysis scripts from code/ root
+mv -f code/dsdm_estimation.py code/archive/ 2>/dev/null || true
+mv -f code/dsdm_robustness.py code/archive/ 2>/dev/null || true
+mv -f code/sdid_estimation.py code/archive/ 2>/dev/null || true
+
+# Move old utils scripts to archive
+mv -f code/utils/ceo_age_extractor_revised.py code/archive/ 2>/dev/null || true
+mv -f code/utils/ceo_age_extractor_revised2.py code/archive/ 2>/dev/null || true
+mv -f code/utils/ceo_age_extractor_v2.py code/archive/ 2>/dev/null || true
+mv -f code/utils/ceo_age_extractor_v3.py code/archive/ 2>/dev/null || true
+mv -f code/utils/digitalization_extraction_revised.py code/archive/ 2>/dev/null || true
+mv -f code/utils/digitalization_extraction.py code/archive/ 2>/dev/null || true
+mv -f code/utils/digitalization_extraction_v2.py code/archive/ 2>/dev/null || true
+mv -f code/utils/control_variables_from_10k.py code/archive/ 2>/dev/null || true
+mv -f code/utils/ceo_demographics.py code/archive/ 2>/dev/null || true
+
+# Move old numbered scripts from root
+mv -f code/07_extract_ceo_age.py code/archive/ 2>/dev/null || true
+mv -f code/08_extract_digitalization.py code/archive/ 2>/dev/null || true
+mv -f code/add_remaining_mappings.py code/archive/ 2>/dev/null || true
+mv -f code/run_pipeline.py code/archive/ 2>/dev/null || true
+
+# Move old scripts from code/core to archive (if they exist)
+mv -f code/core/build_estimation_sample.py code/archive/ 2>/dev/null || true
+mv -f code/core/build_quarterly_dsdm_panel_v3.py code/archive/ 2>/dev/null || true
+
+echo "  Moved deprecated scripts to code/archive/"
+
+# ============================================================================
+# Step 3: Setup core scripts
+# ============================================================================
+echo ""
+echo "Step 3: Setting up core scripts..."
+
+# The core scripts should be:
+# 01_sec_bank_discovery.py      - Discover banks via SEC SIC codes
+# 02_cik_rssd_mapping.py        - Map CIK to RSSD
+# 03_extract_ai_mentions.py     - Extract AI mentions from 10-Q
+# 04_process_ffiec_quarterly.py - Process FFIEC data
+# 05_build_quarterly_panel.py   - Build final panel with all controls
+# 06_construct_weight_matrices.py - Create W matrices
+# 07_extract_ceo_age.py         - Extract CEO age from SEC-API.io
+# 08_extract_digitalization.py  - Extract digitalization from 10-Q
+
+# Rename/move current best scripts to core
+# CEO age extractor (from SEC-API.io)
+if [ -f "code/utils/ceo_age_from_secapi.py" ]; then
+    cp code/utils/ceo_age_from_secapi.py code/core/07_extract_ceo_age.py
+    echo "  Copied ceo_age_from_secapi.py -> 07_extract_ceo_age.py"
 fi
 
-# Step 2: CIK-RSSD Mapping
-if [ -f "code/build_panel_nyfed_crosswalk.py" ]; then
-    cp code/build_panel_nyfed_crosswalk.py code/core/02_cik_rssd_mapping.py
+# Digitalization extractor (from 10-Q)
+if [ -f "code/utils/digitalization_from_10q.py" ]; then
+    cp code/utils/digitalization_from_10q.py code/core/08_extract_digitalization.py
+    echo "  Copied digitalization_from_10q.py -> 08_extract_digitalization.py"
 fi
 
-# Step 3: AI Mention Extraction
-if [ -f "code/extract_10q_full_sample.py" ]; then
-    cp code/extract_10q_full_sample.py code/core/03_extract_ai_mentions.py
-elif [ -f "code/extract_10q_ai_mentions.py" ]; then
-    cp code/extract_10q_ai_mentions.py code/core/03_extract_ai_mentions.py
-fi
+# Keep best version of utils
+echo "  Core scripts ready in code/core/"
 
-# Step 4: FFIEC Quarterly Processing
-if [ -f "code/process_ffiec_quarterly.py" ]; then
-    cp code/process_ffiec_quarterly.py code/core/04_process_ffiec_quarterly.py
-elif [ -f "code/process_ffiec_for_research.py" ]; then
-    cp code/process_ffiec_for_research.py code/core/04_process_ffiec_quarterly.py
-fi
+# ============================================================================
+# Step 4: Setup analysis scripts
+# ============================================================================
+echo ""
+echo "Step 4: Setting up analysis scripts..."
 
-# Step 5: Panel Construction
-if [ -f "code/build_quarterly_dsdm_panel_v2.py" ]; then
-    cp code/build_quarterly_dsdm_panel_v2.py code/core/05_build_quarterly_panel.py
-elif [ -f "code/build_final_dsdm_panel.py" ]; then
-    cp code/build_final_dsdm_panel.py code/core/05_build_quarterly_panel.py
-fi
+# Analysis scripts should already be in code/analysis/
+ls -la code/analysis/ 2>/dev/null || echo "  No scripts in code/analysis/"
 
-# Step 6: Weight Matrix Construction
-if [ -f "code/construct_weight_matrices.py" ]; then
-    cp code/construct_weight_matrices.py code/core/06_construct_weight_matrices.py
-fi
+# ============================================================================
+# Step 5: Update docs
+# ============================================================================
+echo ""
+echo "Step 5: Updating documentation..."
 
-# =============================================================================
-# ANALYSIS SCRIPTS (code/analysis/)
-# =============================================================================
-echo "Moving analysis scripts..."
+# Copy new README and DATA_DICTIONARY to docs
+# (These should be provided separately or created manually)
+echo "  Please update docs/README.md and docs/DATA_DICTIONARY.md manually"
+echo "  or copy from the provided files"
 
-# DSDM Estimation (keep the best version)
-if [ -f "code/dsdm_estimation.py" ]; then
-    cp code/dsdm_estimation.py code/analysis/dsdm_estimation.py
-elif [ -f "code/estimate_dsdm_full.py" ]; then
-    cp code/estimate_dsdm_full.py code/analysis/dsdm_estimation.py
-fi
+# ============================================================================
+# Step 6: Create/Update .gitignore
+# ============================================================================
+echo ""
+echo "Step 6: Creating .gitignore..."
 
-# SDID Estimation
-if [ -f "code/sdid_multimethod_att.py" ]; then
-    cp code/sdid_multimethod_att.py code/analysis/sdid_estimation.py
-elif [ -f "code/sdid_multimethod_consistent.py" ]; then
-    cp code/sdid_multimethod_consistent.py code/analysis/sdid_estimation.py
-fi
+cat > .gitignore << 'EOF'
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.so
+.env
+venv/
+ENV/
 
-# Robustness checks
-if [ -f "code/dsdm_robustness.py" ]; then
-    cp code/dsdm_robustness.py code/analysis/dsdm_robustness.py
-fi
+# Data files (too large for GitHub)
+data/raw/ffiec/*.csv
+data/raw/ffiec/*.txt
+data/raw/ffiec/*.ZIP
+data/raw/sec_edgar/
+data/raw/10k_filings/
+data/raw/10q_*.csv
+data/raw/ai_mentions_*.csv
+data/raw/international_filings/
+data/raw/*.csv
 
-# =============================================================================
-# UTILITY SCRIPTS (code/utils/)
-# =============================================================================
-echo "Moving utility scripts..."
+# Keep processed data structure but not large files
+data/processed/*.csv
+!data/processed/.gitkeep
 
-# Digitalization extraction
-if [ -f "code/digitalization_extraction.py" ]; then
-    cp code/digitalization_extraction.py code/utils/digitalization_extraction.py
-fi
+# Keep interim structure
+data/interim/*.csv
+!data/interim/.gitkeep
 
-# CEO demographics
-if [ -f "code/ceo_demographics_manual.py" ]; then
-    cp code/ceo_demographics_manual.py code/utils/ceo_demographics.py
-fi
+# Output files (reproducible)
+output/figures/*.png
+output/tables/*.csv
 
-# =============================================================================
-# ARCHIVE OLD SCRIPTS
-# =============================================================================
-echo "Archiving deprecated scripts..."
+# OS files
+.DS_Store
+Thumbs.db
 
-# Move all remaining scripts to archive
-for script in code/*.py; do
-    if [ -f "$script" ]; then
-        filename=$(basename "$script")
-        # Check if not already moved to core/analysis/utils
-        if [ ! -f "code/core/$filename" ] && \
-           [ ! -f "code/analysis/$filename" ] && \
-           [ ! -f "code/utils/$filename" ]; then
-            mv "$script" code/archive/
-        fi
-    fi
-done
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
 
-# =============================================================================
-# ORGANIZE DATA FILES
-# =============================================================================
-echo "Organizing data files..."
+# Jupyter
+.ipynb_checkpoints/
 
-# Move crosswalk file
-if [ -f "data/raw/crsp_20240930.csv" ]; then
-    mv data/raw/crsp_20240930.csv data/raw/crosswalk/
-fi
+# Logs
+*.log
 
-# Keep only essential processed files
-# (The rest will remain but could be regenerated)
+# Temporary files
+*.tmp
+*_progress.csv
+EOF
 
-# =============================================================================
-# CREATE PIPELINE RUNNER
-# =============================================================================
-echo "Creating pipeline runner..."
+echo "  Created .gitignore"
 
-cat > code/run_pipeline.py << 'PIPELINE_EOF'
-#!/usr/bin/env python3
-"""
-Master Pipeline Runner
-======================
+# ============================================================================
+# Step 7: Create .gitkeep files
+# ============================================================================
+echo ""
+echo "Step 7: Creating .gitkeep files..."
 
-Runs the complete data extraction and analysis pipeline.
+touch data/processed/.gitkeep
+touch data/interim/.gitkeep
+touch data/raw/.gitkeep
+touch output/tables/.gitkeep
+touch output/figures/.gitkeep
 
-Usage:
-    python code/run_pipeline.py [--step N] [--from-step N]
+echo "  Created .gitkeep files"
 
-Steps:
-    1. Bank Discovery (SEC EDGAR SIC codes)
-    2. CIK-RSSD Mapping (NY Fed crosswalk)
-    3. AI Mention Extraction (10-Q filings)
-    4. FFIEC Processing (Quarterly financials)
-    5. Panel Construction (Merge all sources)
-    6. Weight Matrix Construction (W_geo, W_network, W_size)
-    7. DSDM Estimation
-    8. SDID Estimation
-"""
+# ============================================================================
+# Step 8: Create requirements.txt
+# ============================================================================
+echo ""
+echo "Step 8: Creating requirements.txt..."
 
-import subprocess
-import sys
-import os
-from datetime import datetime
+cat > requirements.txt << 'EOF'
+pandas>=1.5.0
+numpy>=1.21.0
+scipy>=1.9.0
+requests>=2.28.0
+beautifulsoup4>=4.11.0
+lxml>=4.9.0
+matplotlib>=3.5.0
+scikit-learn>=1.1.0
+EOF
 
-STEPS = [
-    ("01_sec_bank_discovery.py", "Bank Discovery via SIC Codes"),
-    ("02_cik_rssd_mapping.py", "CIK-RSSD Mapping"),
-    ("03_extract_ai_mentions.py", "AI Mention Extraction from 10-Q"),
-    ("04_process_ffiec_quarterly.py", "FFIEC Quarterly Processing"),
-    ("05_build_quarterly_panel.py", "Quarterly Panel Construction"),
-    ("06_construct_weight_matrices.py", "Weight Matrix Construction"),
-]
+echo "  Created requirements.txt"
 
-ANALYSIS_STEPS = [
-    ("dsdm_estimation.py", "DSDM Estimation"),
-    ("sdid_estimation.py", "SDID Estimation"),
-]
-
-
-def run_step(script_path, description):
-    """Run a single pipeline step."""
-    print(f"\n{'='*70}")
-    print(f"STEP: {description}")
-    print(f"Script: {script_path}")
-    print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print('='*70)
-    
-    result = subprocess.run([sys.executable, script_path], 
-                          capture_output=False)
-    
-    if result.returncode != 0:
-        print(f"\n❌ Step failed: {description}")
-        return False
-    
-    print(f"\n✓ Step completed: {description}")
-    return True
-
-
-def main():
-    import argparse
-    
-    parser = argparse.ArgumentParser(description='Run analysis pipeline')
-    parser.add_argument('--step', type=int, help='Run only this step')
-    parser.add_argument('--from-step', type=int, default=1, 
-                       help='Start from this step')
-    parser.add_argument('--analysis-only', action='store_true',
-                       help='Run only analysis (DSDM/SDID)')
-    args = parser.parse_args()
-    
-    # Get script directory
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    core_dir = os.path.join(script_dir, 'core')
-    analysis_dir = os.path.join(script_dir, 'analysis')
-    
-    print("="*70)
-    print("GENAI ADOPTION PANEL - ANALYSIS PIPELINE")
-    print("="*70)
-    
-    if args.analysis_only:
-        steps_to_run = [(os.path.join(analysis_dir, s), d) 
-                       for s, d in ANALYSIS_STEPS]
-    else:
-        steps_to_run = [(os.path.join(core_dir, s), d) 
-                       for s, d in STEPS]
-        steps_to_run += [(os.path.join(analysis_dir, s), d) 
-                        for s, d in ANALYSIS_STEPS]
-    
-    # Filter steps
-    if args.step:
-        steps_to_run = [steps_to_run[args.step - 1]]
-    elif args.from_step > 1:
-        steps_to_run = steps_to_run[args.from_step - 1:]
-    
-    # Run pipeline
-    for script_path, description in steps_to_run:
-        if os.path.exists(script_path):
-            success = run_step(script_path, description)
-            if not success:
-                print("\nPipeline stopped due to error.")
-                sys.exit(1)
-        else:
-            print(f"\n⚠ Script not found: {script_path}")
-    
-    print("\n" + "="*70)
-    print("PIPELINE COMPLETE")
-    print("="*70)
-
-
-if __name__ == "__main__":
-    main()
-PIPELINE_EOF
-
+# ============================================================================
+# Summary
+# ============================================================================
+echo ""
 echo "=============================================="
 echo "REORGANIZATION COMPLETE"
 echo "=============================================="
 echo ""
-echo "New structure:"
-echo "  code/"
-echo "    ├── core/           # 6 essential pipeline scripts"
-echo "    ├── analysis/       # DSDM and SDID estimation"
-echo "    ├── utils/          # Helper functions"
-echo "    ├── archive/        # Deprecated scripts"
-echo "    └── run_pipeline.py # Master runner"
+echo "Directory structure:"
 echo ""
-echo "To run full pipeline:"
-echo "  python code/run_pipeline.py"
+echo "code/"
+echo "├── core/                    # Main pipeline (01-08)"
+echo "│   ├── 01_sec_bank_discovery.py"
+echo "│   ├── 02_cik_rssd_mapping.py"
+echo "│   ├── 03_extract_ai_mentions.py"
+echo "│   ├── 04_process_ffiec_quarterly.py"
+echo "│   ├── 05_build_quarterly_panel.py"
+echo "│   ├── 06_construct_weight_matrices.py"
+echo "│   ├── 07_extract_ceo_age.py      # SEC-API.io"
+echo "│   └── 08_extract_digitalization.py # 10-Q keywords"
+echo "├── analysis/                # Estimation scripts"
+echo "├── utils/                   # Helper functions"
+echo "└── archive/                 # Old scripts"
 echo ""
-echo "To run analysis only:"
-echo "  python code/run_pipeline.py --analysis-only"
+echo "Next steps:"
+echo "1. Review and update docs/README.md"
+echo "2. Review and update docs/DATA_DICTIONARY.md"
+echo "3. Run: git add ."
+echo "4. Run: git commit -m 'Reorganize project structure'"
+echo "5. Run: git push origin main"
