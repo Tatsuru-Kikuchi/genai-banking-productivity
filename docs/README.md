@@ -157,17 +157,6 @@ scipy>=1.9.0
 
 - **SEC-API.io**: For CEO age extraction (Directors & Board Members API)
 
-## Citation
-
-```bibtex
-@article{kikuchi2025genai,
-  title={Generative AI Adoption and Banking Productivity: Evidence from U.S. Bank Holding Companies},
-  author={Kikuchi, Tatsuru},
-  year={2025},
-  institution={University of Tokyo}
-}
-```
-
 ## Contact
 
 Tatsuru Kikuchi  
