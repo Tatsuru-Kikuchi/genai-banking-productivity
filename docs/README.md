@@ -161,4 +161,4 @@ scipy>=1.9.0
 
 Tatsuru Kikuchi  
 University of Tokyo  
-tatsuru.kikuchi@e.u-tokyo.ac.jp
+tatsuru.kikuchi@gmail.com
