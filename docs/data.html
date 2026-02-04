@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<title>Data Pipeline — Innovation Tax</title>
+<style>
+:root {
+  --navy:#0a1628;--navy-light:#111d35;--navy-mid:#162544;
+  --blue:#2d6cdf;--blue-light:#4a8af4;--blue-glow:rgba(45,108,223,0.15);
+  --cyan:#38bdf8;--gold:#f0b429;--gold-dim:rgba(240,180,41,0.15);
+  --white:#f1f5f9;--gray:#94a3b8;--gray-dark:#475569;
+  --card-bg:rgba(22,37,68,0.6);--border:rgba(148,163,184,0.1);
+  --success:#34d399;--danger:#f87171;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(20px);background:rgba(10,22,40,0.85);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between}
+nav .logo{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--white);text-decoration:none;letter-spacing:-0.02em}
+nav .logo span{color:var(--gold)}
+nav ul{list-style:none;display:flex;gap:2rem}
+nav ul a{color:var(--gray);text-decoration:none;font-size:.85rem;font-weight:500;letter-spacing:.03em;text-transform:uppercase;transition:color .2s}
+nav ul a:hover{color:var(--white)}
+nav ul a.active{color:var(--gold)}
+.page-header{padding:7rem 2rem 3rem;max-width:1200px;margin:0 auto}
+.page-header .breadcrumb{font-size:.78rem;color:var(--gray);margin-bottom:1rem}
+.page-header .breadcrumb a{color:var(--blue-light);text-decoration:none}
+.page-header h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);letter-spacing:-0.02em;margin-bottom:.75rem}
+.page-header p{color:var(--gray);max-width:700px;font-size:1rem}
+.content{padding:0 2rem 4rem;max-width:1200px;margin:0 auto}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem}
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:2rem}
+.card h3{font-size:1.1rem;font-weight:600;margin-bottom:1rem}
+.card-label{font-size:.72rem;color:var(--blue-light);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:.75rem}
+.chart-wrap{position:relative;height:320px;width:100%}
+.chart-wrap canvas{width:100%!important;height:100%!important}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem}
+.kpi{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
+.kpi .val{font-family:'DM Serif Display',serif;font-size:1.8rem}
+.kpi .lbl{font-size:.75rem;color:var(--gray);margin-top:.25rem;text-transform:uppercase;letter-spacing:.06em}
+.kpi .val.pos{color:var(--success)}
+.kpi .val.neg{color:var(--danger)}
+.kpi .val.blue{color:var(--blue-light)}
+.kpi .val.gold{color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{text-align:left;padding:.75rem 1rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gray);border-bottom:2px solid var(--border);font-weight:600}
+td{padding:.65rem 1rem;border-bottom:1px solid var(--border)}
+tr:hover td{background:rgba(45,108,223,0.04)}
+.sig{color:var(--gold);font-weight:700;font-family:'JetBrains Mono',monospace;font-size:.8rem}
+.sig-none{color:var(--gray-dark)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:.82rem}
+.tab-bar{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab-btn{padding:.5rem 1.2rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.tab-btn.active,.tab-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.pipeline-flow{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:2rem 0}
+.pipe-box{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;text-align:center;flex:1;min-width:140px;transition:all .3s}
+.pipe-box:hover{border-color:var(--blue);transform:translateY(-2px)}
+.pipe-box .icon{font-size:1.6rem;margin-bottom:.5rem}
+.pipe-box h4{font-size:.88rem;margin-bottom:.25rem}
+.pipe-box p{font-size:.75rem;color:var(--gray)}
+.pipe-arrow{font-size:1.5rem;color:var(--gray-dark);flex-shrink:0}
+.eq-box{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--cyan);background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.15);padding:1.25rem 1.5rem;border-radius:10px;margin:1rem 0;line-height:1.8;overflow-x:auto}
+footer{border-top:1px solid var(--border);padding:2rem;max-width:1200px;margin:0 auto;text-align:center;font-size:.78rem;color:var(--gray-dark)}
+@media(max-width:768px){
+  nav ul{display:none}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .pipeline-flow{flex-direction:column}
+  .pipe-arrow{transform:rotate(90deg)}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Innovation<span>Tax</span></a>
+  <ul><li><a href="index.html">Overview</a></li>
+<li><a href="data.html" class="active">Data</a></li>
+<li><a href="dsdm.html">DSDM</a></li>
+<li><a href="sdid.html">SDID</a></li>
+<li><a href="network.html">Network</a></li>
+<li><a href="results.html">Results</a></li>
+
+    <li><a href="https://github.com/Tatsuru-Kikuchi/genai-banking-productivity" target="_blank">GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="page-header">
+  <div class="breadcrumb"><a href="index.html">Home</a> / Data Pipeline & Sources</div>
+  <h1>Data Pipeline & Sources</h1>
+  <p>Interactive visualization of the data construction process from raw regulatory filings to the final estimation panel.</p>
+</div>
+
+<div class="content">
+
+<div class="kpi-row">
+  <div class="kpi"><div class="val gold">4</div><div class="lbl">Data Sources</div></div>
+  <div class="kpi"><div class="val blue">809</div><div class="lbl">Unique Banks</div></div>
+  <div class="kpi"><div class="val gold">28</div><div class="lbl">Quarters</div></div>
+  <div class="kpi"><div class="val blue">24,270</div><div class="lbl">Panel Observations</div></div>
+  <div class="kpi"><div class="val pos">95.4%</div><div class="lbl">Match Rate</div></div>
+</div>
+
+<div class="card" style="margin-bottom:1.5rem">
+  <div class="card-label">Data Flow</div>
+  <h3>Pipeline Architecture</h3>
+  <div class="pipeline-flow">
+    <div class="pipe-box">
+      <div class="icon">📄</div>
+      <h4>SEC EDGAR</h4>
+      <p>10-Q, 10-K, DEF 14A filings</p>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-box">
+      <div class="icon">⚙️</div>
+      <h4>Text Mining</h4>
+      <p>Regex extraction<br>AI keywords, Digital Index, CEO age</p>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-box">
+      <div class="icon">🏦</div>
+      <h4>FR Y-9C</h4>
+      <p>Fed quarterly reports<br>ROA, ROE, Capital, Assets</p>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-box">
+      <div class="icon">🔗</div>
+      <h4>NY Fed Link</h4>
+      <p>CIK → RSSD mapping<br>95.4% match rate</p>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-box" style="border-color:var(--blue)">
+      <div class="icon">📊</div>
+      <h4>Final Panel</h4>
+      <p>809 Banks × 28 Quarters<br><strong>24,270 obs</strong></p>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-label">Variable Definitions</div>
+    <h3>Outcome & Treatment Variables</h3>
+    <table>
+      <thead><tr><th>Variable</th><th>Definition</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">ROA (%)</td><td>Net Income / Total Assets × 100</td><td>FR Y-9C</td></tr>
+        <tr><td class="mono">ROE (%)</td><td>Net Income / Total Equity × 100</td><td>FR Y-9C</td></tr>
+        <tr><td class="mono">D<sup>AI</sup></td><td>= 1 if GenAI keyword in SEC filing</td><td>10-Q</td></tr>
+        <tr><td class="mono">Tier 1 Ratio</td><td>Tier 1 Capital / RWA</td><td>FR Y-9C</td></tr>
+        <tr><td class="mono">Log Assets</td><td>ln(Total Assets)</td><td>FR Y-9C</td></tr>
+        <tr><td class="mono">Digital Index</td><td>Weighted IT keyword count (z-score)</td><td>10-K/10-Q</td></tr>
+        <tr><td class="mono">CEO Age</td><td>Executive age from proxy filings</td><td>DEF 14A</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Sample Construction</div>
+    <h3>Bank Coverage by SIC Code</h3>
+    <div class="chart-wrap"><canvas id="sicChart"></canvas></div>
+  </div>
+</div>
+
+<div style="margin-top:1.5rem" class="grid-2">
+  <div class="card">
+    <div class="card-label">Treatment Timeline</div>
+    <h3>AI Adoption Over Time</h3>
+    <div class="chart-wrap"><canvas id="adoptChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-label">Weight Matrices</div>
+    <h3>Spatial Structure</h3>
+    <table>
+      <thead><tr><th>Matrix</th><th>Construction</th><th>Use</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">W_geo</td><td>Inverse geographic distance between HQ locations</td><td>Baseline robustness</td></tr>
+        <tr><td class="mono">W_network</td><td>Asset-size similarity (k-nearest neighbors)</td><td>Primary specification</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:1.5rem">
+      <div class="card-label">SIC Code Coverage</div>
+      <table>
+        <thead><tr><th>SIC</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">6021</td><td>National Commercial Banks - Federal</td></tr>
+          <tr><td class="mono">6022</td><td>State Commercial Banks - Federal Reserve</td></tr>
+          <tr><td class="mono">6712</td><td>State Chartered Banks - FDIC</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+Chart.defaults.color='#94a3b8';
+Chart.defaults.borderColor='rgba(148,163,184,0.1)';
+Chart.defaults.font.family="'DM Sans',sans-serif";
+
+new Chart(document.getElementById('sicChart'),{
+  type:'doughnut',
+  data:{
+    labels:['SIC 6021 (National)','SIC 6022 (State)','SIC 6712 (FDIC)'],
+    datasets:[{data:[320,280,209],backgroundColor:['#4a8af4','#38bdf8','#f0b429'],borderWidth:0,hoverOffset:8}]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:12}},
+      tooltip:{backgroundColor:'#162544',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(148,163,184,0.2)',borderWidth:1}}
+  }
+});
+
+new Chart(document.getElementById('adoptChart'),{
+  type:'line',
+  data:{
+    labels:['2018Q1','2019Q1','2020Q1','2021Q1','2022Q1','2022Q4','2023Q1','2023Q2','2023Q3','2023Q4','2024Q1','2024Q2','2024Q3','2024Q4','2025Q1'],
+    datasets:[{
+      label:'Cumulative AI-Mentioning Banks',
+      data:[2,5,8,12,18,22,35,52,78,105,140,168,190,205,220],
+      borderColor:'#f0b429',backgroundColor:'rgba(240,180,41,0.1)',fill:true,tension:.3,borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#f0b429'
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:'#162544',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(148,163,184,0.2)',borderWidth:1},
+      annotation:{annotations:{chatgpt:{type:'line',xMin:5,xMax:5,borderColor:'rgba(248,113,113,0.6)',borderWidth:2,borderDash:[6,3],label:{display:true,content:'ChatGPT Release',color:'#f87171',font:{size:10}}}}}
+    },
+    scales:{
+      y:{title:{display:true,text:'Number of Banks'},grid:{color:'rgba(148,163,184,0.06)'}},
+      x:{grid:{display:false},ticks:{maxRotation:45}}
+    }
+  }
+});
+</script>
+
+</div>
+
+<footer>© 2025 Tatsuru Kikuchi · Center for Advanced Research in Finance · The University of Tokyo</footer>
+</body>
+</html>

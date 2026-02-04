@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<title>Network & Heterogeneity — Innovation Tax</title>
+<style>
+:root {
+  --navy:#0a1628;--navy-light:#111d35;--navy-mid:#162544;
+  --blue:#2d6cdf;--blue-light:#4a8af4;--blue-glow:rgba(45,108,223,0.15);
+  --cyan:#38bdf8;--gold:#f0b429;--gold-dim:rgba(240,180,41,0.15);
+  --white:#f1f5f9;--gray:#94a3b8;--gray-dark:#475569;
+  --card-bg:rgba(22,37,68,0.6);--border:rgba(148,163,184,0.1);
+  --success:#34d399;--danger:#f87171;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(20px);background:rgba(10,22,40,0.85);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between}
+nav .logo{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--white);text-decoration:none;letter-spacing:-0.02em}
+nav .logo span{color:var(--gold)}
+nav ul{list-style:none;display:flex;gap:2rem}
+nav ul a{color:var(--gray);text-decoration:none;font-size:.85rem;font-weight:500;letter-spacing:.03em;text-transform:uppercase;transition:color .2s}
+nav ul a:hover{color:var(--white)}
+nav ul a.active{color:var(--gold)}
+.page-header{padding:7rem 2rem 3rem;max-width:1200px;margin:0 auto}
+.page-header .breadcrumb{font-size:.78rem;color:var(--gray);margin-bottom:1rem}
+.page-header .breadcrumb a{color:var(--blue-light);text-decoration:none}
+.page-header h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);letter-spacing:-0.02em;margin-bottom:.75rem}
+.page-header p{color:var(--gray);max-width:700px;font-size:1rem}
+.content{padding:0 2rem 4rem;max-width:1200px;margin:0 auto}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem}
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:2rem}
+.card h3{font-size:1.1rem;font-weight:600;margin-bottom:1rem}
+.card-label{font-size:.72rem;color:var(--blue-light);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:.75rem}
+.chart-wrap{position:relative;height:320px;width:100%}
+.chart-wrap canvas{width:100%!important;height:100%!important}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem}
+.kpi{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
+.kpi .val{font-family:'DM Serif Display',serif;font-size:1.8rem}
+.kpi .lbl{font-size:.75rem;color:var(--gray);margin-top:.25rem;text-transform:uppercase;letter-spacing:.06em}
+.kpi .val.pos{color:var(--success)}
+.kpi .val.neg{color:var(--danger)}
+.kpi .val.blue{color:var(--blue-light)}
+.kpi .val.gold{color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{text-align:left;padding:.75rem 1rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gray);border-bottom:2px solid var(--border);font-weight:600}
+td{padding:.65rem 1rem;border-bottom:1px solid var(--border)}
+tr:hover td{background:rgba(45,108,223,0.04)}
+.sig{color:var(--gold);font-weight:700;font-family:'JetBrains Mono',monospace;font-size:.8rem}
+.sig-none{color:var(--gray-dark)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:.82rem}
+.tab-bar{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab-btn{padding:.5rem 1.2rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.tab-btn.active,.tab-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.pipeline-flow{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:2rem 0}
+.pipe-box{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;text-align:center;flex:1;min-width:140px;transition:all .3s}
+.pipe-box:hover{border-color:var(--blue);transform:translateY(-2px)}
+.pipe-box .icon{font-size:1.6rem;margin-bottom:.5rem}
+.pipe-box h4{font-size:.88rem;margin-bottom:.25rem}
+.pipe-box p{font-size:.75rem;color:var(--gray)}
+.pipe-arrow{font-size:1.5rem;color:var(--gray-dark);flex-shrink:0}
+.eq-box{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--cyan);background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.15);padding:1.25rem 1.5rem;border-radius:10px;margin:1rem 0;line-height:1.8;overflow-x:auto}
+footer{border-top:1px solid var(--border);padding:2rem;max-width:1200px;margin:0 auto;text-align:center;font-size:.78rem;color:var(--gray-dark)}
+@media(max-width:768px){
+  nav ul{display:none}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .pipeline-flow{flex-direction:column}
+  .pipe-arrow{transform:rotate(90deg)}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Innovation<span>Tax</span></a>
+  <ul><li><a href="index.html">Overview</a></li>
+<li><a href="data.html">Data</a></li>
+<li><a href="dsdm.html">DSDM</a></li>
+<li><a href="sdid.html">SDID</a></li>
+<li><a href="network.html" class="active">Network</a></li>
+<li><a href="results.html">Results</a></li>
+
+    <li><a href="https://github.com/Tatsuru-Kikuchi/genai-banking-productivity" target="_blank">GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="page-header">
+  <div class="breadcrumb"><a href="index.html">Home</a> / Network Effects & Heterogeneity</div>
+  <h1>Network Effects & Heterogeneity</h1>
+  <p>Bank size heterogeneity analysis revealing algorithmic coupling in the systemic core of large AI-adopting banks.</p>
+</div>
+
+<div class="content">
+
+<div class="kpi-row">
+  <div class="kpi"><div class="val gold">3.13***</div><div class="lbl">Large Bank θ (ROE)</div></div>
+  <div class="kpi"><div class="val" style="color:var(--gray-dark)">0.15 n.s.</div><div class="lbl">Small Bank θ (ROE)</div></div>
+  <div class="kpi"><div class="val pos">20×</div><div class="lbl">Spillover Gap</div></div>
+  <div class="kpi"><div class="val neg">−517 bp</div><div class="lbl">Small Bank Tax</div></div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-label">Heterogeneity Analysis</div>
+    <h3>DSDM by Bank Size (Network W, Bayesian)</h3>
+    <table>
+      <thead><tr><th>Parameter</th><th>Large Banks (Top 25%)</th><th>Small Banks (Bottom 75%)</th></tr></thead>
+      <tbody>
+        <tr><td>β (ROA)</td><td class="mono">0.7967</td><td class="mono">−0.1903</td></tr>
+        <tr><td>β (ROE)</td><td class="mono">−0.3991</td><td class="mono">−1.2147</td></tr>
+        <tr><td>θ (ROA)</td><td class="mono">−0.3164</td><td class="mono">0.9456 <span class="sig">***</span></td></tr>
+        <tr><td style="font-weight:700">θ (ROE)</td><td class="mono" style="font-weight:700">1.6191 <span class="sig">***</span></td><td class="mono">18.8024 <span class="sig">***</span></td></tr>
+        <tr><td>τ (ROA)</td><td class="mono">0.4281 <span class="sig">***</span></td><td class="mono">0.1403 <span class="sig">**</span></td></tr>
+        <tr><td>τ (ROE)</td><td class="mono">0.4161 <span class="sig">***</span></td><td class="mono">0.0595</td></tr>
+        <tr><td>ρ (ROA)</td><td class="mono">0.3566 <span class="sig">**</span></td><td class="mono">0.0405</td></tr>
+        <tr><td>ρ (ROE)</td><td class="mono">−0.0124</td><td class="mono">−0.0923</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Spillover Comparison</div>
+    <h3>θ (Spillover) by Bank Size</h3>
+    <div class="chart-wrap"><canvas id="spilloverChart"></canvas></div>
+  </div>
+</div>
+
+<div style="margin-top:1.5rem" class="grid-2">
+  <div class="card">
+    <div class="card-label">Critical Finding</div>
+    <h3>Algorithmic Coupling in the Systemic Core</h3>
+    <div style="background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.2);border-radius:12px;padding:1.5rem;margin-bottom:1rem">
+      <p style="font-size:1rem;margin-bottom:1rem"><strong style="color:var(--gold)">θ = 3.13 (large)</strong> vs <strong style="color:var(--gray)">θ = 0.15 n.s. (small)</strong></p>
+      <p style="font-size:.9rem;color:var(--gray)">Large banks exhibit 20× stronger spillovers than small banks, indicating that AI adoption creates <em>synchronized profitability</em> across the systemic core. This "algorithmic coupling" amplifies positive shocks in normal times but represents a potential contagion channel under stress.</p>
+    </div>
+    <div class="chart-wrap" style="height:250px"><canvas id="couplingChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-label">Economic Mechanisms</div>
+    <h3>Why Spillovers Differ by Size</h3>
+    <div style="margin-bottom:1rem">
+      <h4 style="color:var(--success);font-size:.9rem;margin-bottom:.5rem">Large Banks — Strong Coupling</h4>
+      <ul style="color:var(--gray);font-size:.85rem;padding-left:1.2rem;line-height:1.8">
+        <li>Shared AI vendor ecosystems (Azure, AWS)</li>
+        <li>Correlated investment in similar technologies</li>
+        <li>Interconnected through capital markets</li>
+        <li>Executive labor market spillovers</li>
+      </ul>
+    </div>
+    <div style="margin-bottom:1rem">
+      <h4 style="color:var(--danger);font-size:.9rem;margin-bottom:.5rem">Small Banks — Isolated</h4>
+      <ul style="color:var(--gray);font-size:.85rem;padding-left:1.2rem;line-height:1.8">
+        <li>Limited AI investment capacity</li>
+        <li>Rely on third-party fintech providers</li>
+        <li>Geographically isolated operations</li>
+        <li>Less interconnected in capital markets</li>
+      </ul>
+    </div>
+    <div>
+      <h4 style="color:var(--gold);font-size:.9rem;margin-bottom:.5rem">Systemic Risk Implications</h4>
+      <ul style="color:var(--gray);font-size:.85rem;padding-left:1.2rem;line-height:1.8">
+        <li>AI creates new contagion channel among large banks</li>
+        <li>Model risk correlated across institutions</li>
+        <li>Vendor concentration creates single points of failure</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+Chart.defaults.color='#94a3b8';
+Chart.defaults.borderColor='rgba(148,163,184,0.1)';
+Chart.defaults.font.family="'DM Sans',sans-serif";
+
+new Chart(document.getElementById('spilloverChart'),{
+  type:'bar',
+  data:{
+    labels:['ROA θ','ROE θ'],
+    datasets:[
+      {label:'Large Banks',data:[-0.3164,1.6191],backgroundColor:'rgba(74,138,244,0.7)',borderRadius:6},
+      {label:'Small Banks',data:[0.9456,18.8024],backgroundColor:'rgba(240,180,41,0.7)',borderRadius:6}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12}},
+      tooltip:{backgroundColor:'#162544',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(148,163,184,0.2)',borderWidth:1}},
+    scales:{y:{title:{display:true,text:'θ (Spillover Coefficient)'},grid:{color:'rgba(148,163,184,0.06)'}},x:{grid:{display:false}}}
+  }
+});
+
+new Chart(document.getElementById('couplingChart'),{
+  type:'radar',
+  data:{
+    labels:['θ Spillover','τ Persistence','ρ Spatial Lag','β Direct','Capital Effect'],
+    datasets:[
+      {label:'Large Banks',data:[1.62,0.42,0.36,-0.40,2.57],borderColor:'#4a8af4',backgroundColor:'rgba(74,138,244,0.15)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#4a8af4'},
+      {label:'Small Banks',data:[18.8,0.06,-0.09,-1.21,1.31],borderColor:'#f0b429',backgroundColor:'rgba(240,180,41,0.1)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#f0b429'}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12}}},
+    scales:{r:{grid:{color:'rgba(148,163,184,0.1)'},angleLines:{color:'rgba(148,163,184,0.08)'},pointLabels:{color:'#94a3b8',font:{size:11}}}}
+  }
+});
+</script>
+
+</div>
+
+<footer>© 2025 Tatsuru Kikuchi · Center for Advanced Research in Finance · The University of Tokyo</footer>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<title>DSDM Results — Innovation Tax</title>
+<style>
+:root {
+  --navy:#0a1628;--navy-light:#111d35;--navy-mid:#162544;
+  --blue:#2d6cdf;--blue-light:#4a8af4;--blue-glow:rgba(45,108,223,0.15);
+  --cyan:#38bdf8;--gold:#f0b429;--gold-dim:rgba(240,180,41,0.15);
+  --white:#f1f5f9;--gray:#94a3b8;--gray-dark:#475569;
+  --card-bg:rgba(22,37,68,0.6);--border:rgba(148,163,184,0.1);
+  --success:#34d399;--danger:#f87171;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(20px);background:rgba(10,22,40,0.85);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between}
+nav .logo{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--white);text-decoration:none;letter-spacing:-0.02em}
+nav .logo span{color:var(--gold)}
+nav ul{list-style:none;display:flex;gap:2rem}
+nav ul a{color:var(--gray);text-decoration:none;font-size:.85rem;font-weight:500;letter-spacing:.03em;text-transform:uppercase;transition:color .2s}
+nav ul a:hover{color:var(--white)}
+nav ul a.active{color:var(--gold)}
+.page-header{padding:7rem 2rem 3rem;max-width:1200px;margin:0 auto}
+.page-header .breadcrumb{font-size:.78rem;color:var(--gray);margin-bottom:1rem}
+.page-header .breadcrumb a{color:var(--blue-light);text-decoration:none}
+.page-header h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);letter-spacing:-0.02em;margin-bottom:.75rem}
+.page-header p{color:var(--gray);max-width:700px;font-size:1rem}
+.content{padding:0 2rem 4rem;max-width:1200px;margin:0 auto}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem}
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:2rem}
+.card h3{font-size:1.1rem;font-weight:600;margin-bottom:1rem}
+.card-label{font-size:.72rem;color:var(--blue-light);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:.75rem}
+.chart-wrap{position:relative;height:320px;width:100%}
+.chart-wrap canvas{width:100%!important;height:100%!important}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem}
+.kpi{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
+.kpi .val{font-family:'DM Serif Display',serif;font-size:1.8rem}
+.kpi .lbl{font-size:.75rem;color:var(--gray);margin-top:.25rem;text-transform:uppercase;letter-spacing:.06em}
+.kpi .val.pos{color:var(--success)}
+.kpi .val.neg{color:var(--danger)}
+.kpi .val.blue{color:var(--blue-light)}
+.kpi .val.gold{color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{text-align:left;padding:.75rem 1rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gray);border-bottom:2px solid var(--border);font-weight:600}
+td{padding:.65rem 1rem;border-bottom:1px solid var(--border)}
+tr:hover td{background:rgba(45,108,223,0.04)}
+.sig{color:var(--gold);font-weight:700;font-family:'JetBrains Mono',monospace;font-size:.8rem}
+.sig-none{color:var(--gray-dark)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:.82rem}
+.tab-bar{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab-btn{padding:.5rem 1.2rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.tab-btn.active,.tab-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.pipeline-flow{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:2rem 0}
+.pipe-box{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;text-align:center;flex:1;min-width:140px;transition:all .3s}
+.pipe-box:hover{border-color:var(--blue);transform:translateY(-2px)}
+.pipe-box .icon{font-size:1.6rem;margin-bottom:.5rem}
+.pipe-box h4{font-size:.88rem;margin-bottom:.25rem}
+.pipe-box p{font-size:.75rem;color:var(--gray)}
+.pipe-arrow{font-size:1.5rem;color:var(--gray-dark);flex-shrink:0}
+.eq-box{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--cyan);background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.15);padding:1.25rem 1.5rem;border-radius:10px;margin:1rem 0;line-height:1.8;overflow-x:auto}
+footer{border-top:1px solid var(--border);padding:2rem;max-width:1200px;margin:0 auto;text-align:center;font-size:.78rem;color:var(--gray-dark)}
+@media(max-width:768px){
+  nav ul{display:none}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .pipeline-flow{flex-direction:column}
+  .pipe-arrow{transform:rotate(90deg)}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Innovation<span>Tax</span></a>
+  <ul><li><a href="index.html">Overview</a></li>
+<li><a href="data.html">Data</a></li>
+<li><a href="dsdm.html" class="active">DSDM</a></li>
+<li><a href="sdid.html">SDID</a></li>
+<li><a href="network.html">Network</a></li>
+<li><a href="results.html">Results</a></li>
+
+    <li><a href="https://github.com/Tatsuru-Kikuchi/genai-banking-productivity" target="_blank">GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="page-header">
+  <div class="breadcrumb"><a href="index.html">Home</a> / DSDM Results</div>
+  <h1>DSDM Results</h1>
+  <p>Dynamic Spatial Durbin Model estimates — direct effects, spillovers, and control variables across methods and samples.</p>
+</div>
+
+<div class="content">
+
+<div class="kpi-row">
+  <div class="kpi"><div class="val pos">β = 0.04**</div><div class="lbl">Direct ROA Effect</div></div>
+  <div class="kpi"><div class="val pos">β = 0.42***</div><div class="lbl">Direct ROE Effect</div></div>
+  <div class="kpi"><div class="val gold">θ = 0.16***</div><div class="lbl">Spillover ROA</div></div>
+  <div class="kpi"><div class="val gold">θ = 0.68**</div><div class="lbl">Spillover ROE</div></div>
+  <div class="kpi"><div class="val blue">ρ = 0.75***</div><div class="lbl">Spatial Autocorrelation</div></div>
+</div>
+
+<div class="card" style="margin-bottom:1.5rem">
+  <div class="card-label">Model Specification</div>
+  <div class="eq-box">Y<sub>it</sub> = τY<sub>i,t-1</sub> + ρΣ<sub>j</sub>w<sub>ij</sub>Y<sub>jt</sub> + <strong style="color:#34d399">β</strong>D<sup>AI</sup><sub>it</sub> + <strong style="color:#f0b429">θ</strong>Σ<sub>j</sub>w<sub>ij</sub>D<sup>AI</sup><sub>jt</sub> + γ'X<sub>it</sub> + μ<sub>i</sub> + δ<sub>t</sub> + ε<sub>it</sub></div>
+  <p style="color:var(--gray);font-size:.88rem"><strong style="color:var(--success)">β</strong> = direct effect of own AI adoption &nbsp;|&nbsp; <strong style="color:var(--gold)">θ</strong> = spillover effect from peer AI adoption &nbsp;|&nbsp; Bayesian estimation, Network weight matrix (W_network)</p>
+</div>
+
+<div class="tab-bar" id="dsdm-tabs">
+  <button class="tab-btn active" data-tab="network">Network W</button>
+  <button class="tab-btn" data-tab="geo">Geographic W</button>
+</div>
+
+<div id="tab-network">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-label">Panel A — AI Adoption Effects</div>
+    <h3>ROA & ROE (Network W, Bayesian)</h3>
+    <table>
+      <thead><tr><th>Parameter</th><th>ROA (%)</th><th>ROE (%)</th></tr></thead>
+      <tbody>
+        <tr><td>Direct Effect (β)</td><td class="mono">−0.2652 <span class="sig">**</span></td><td class="mono">−1.4790 <span class="sig">**</span></td></tr>
+        <tr><td>Spillover (θ)</td><td class="mono">0.3491</td><td class="mono">13.0711 <span class="sig">***</span></td></tr>
+        <tr><td>Temporal lag (τ)</td><td class="mono">0.2026 <span class="sig">***</span></td><td class="mono">0.2331 <span class="sig">***</span></td></tr>
+        <tr><td>Spatial lag (ρ)</td><td class="mono">−0.1568 <span class="sig">***</span></td><td class="mono">−0.1855</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-label">Panel B — Control Variables</div>
+    <h3>Network W, Bayesian</h3>
+    <table>
+      <thead><tr><th>Variable</th><th>ROA</th><th>ROE</th></tr></thead>
+      <tbody>
+        <tr><td>Tier 1 Capital Ratio</td><td class="mono">0.0870 <span class="sig">***</span></td><td class="mono">0.0448</td></tr>
+        <tr><td>Log Assets</td><td class="mono">−0.0018</td><td class="mono">2.3601 <span class="sig">**</span></td></tr>
+        <tr><td>Digital Index</td><td class="mono">0.0988 <span class="sig">***</span></td><td class="mono">−1.7085 <span class="sig">***</span></td></tr>
+        <tr><td>CEO Age</td><td class="mono">0.0031</td><td class="mono">−0.4794 <span class="sig">*</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<div id="tab-geo" style="display:none">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-label">Panel A — AI Adoption Effects</div>
+    <h3>ROA & ROE (Geographic W, Bayesian)</h3>
+    <table>
+      <thead><tr><th>Parameter</th><th>ROA (%)</th><th>ROE (%)</th></tr></thead>
+      <tbody>
+        <tr><td>Direct Effect (β)</td><td class="mono">−0.3227 <span class="sig">***</span></td><td class="mono">−4.6363 <span class="sig">***</span></td></tr>
+        <tr><td>Spillover (θ)</td><td class="mono">0.1247</td><td class="mono">4.3539 <span class="sig">***</span></td></tr>
+        <tr><td>Temporal lag (τ)</td><td class="mono">0.2050 <span class="sig">***</span></td><td class="mono">0.2089 <span class="sig">***</span></td></tr>
+        <tr><td>Spatial lag (ρ)</td><td class="mono">0.2379 <span class="sig">***</span></td><td class="mono">0.5024 <span class="sig">***</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-label">Panel B — Control Variables</div>
+    <h3>Geographic W, Bayesian</h3>
+    <table>
+      <thead><tr><th>Variable</th><th>ROA</th><th>ROE</th></tr></thead>
+      <tbody>
+        <tr><td>Tier 1 Capital Ratio</td><td class="mono">0.1274 <span class="sig">***</span></td><td class="mono">0.5671 <span class="sig">***</span></td></tr>
+        <tr><td>Log Assets</td><td class="mono">−0.0839 <span class="sig">***</span></td><td class="mono">−0.3375 <span class="sig">***</span></td></tr>
+        <tr><td>Digital Index</td><td class="mono">−0.1294 <span class="sig">***</span></td><td class="mono">−1.0785 <span class="sig">***</span></td></tr>
+        <tr><td>CEO Age</td><td class="mono">0.0124 <span class="sig">***</span></td><td class="mono">0.0676 <span class="sig">***</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<div style="margin-top:1.5rem" class="grid-2">
+  <div class="card">
+    <div class="card-label">Visualization</div>
+    <h3>β and θ Across Methods (ROE, Full Sample)</h3>
+    <div class="chart-wrap"><canvas id="methodChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-label">Control Variable Effects</div>
+    <h3>Control Variables on ROA (Network W)</h3>
+    <div class="chart-wrap"><canvas id="controlChart"></canvas></div>
+  </div>
+</div>
+
+<script>
+Chart.defaults.color='#94a3b8';
+Chart.defaults.borderColor='rgba(148,163,184,0.1)';
+Chart.defaults.font.family="'DM Sans',sans-serif";
+
+// Tab switching
+document.querySelectorAll('#dsdm-tabs .tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#dsdm-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-network').style.display=btn.dataset.tab==='network'?'':'none';
+    document.getElementById('tab-geo').style.display=btn.dataset.tab==='geo'?'':'none';
+  });
+});
+
+new Chart(document.getElementById('methodChart'),{
+  type:'bar',
+  data:{
+    labels:['MLE','Q-MLE','Bayesian'],
+    datasets:[
+      {label:'β (Direct)',data:[-1.479,-1.479,-1.479],backgroundColor:'rgba(74,138,244,0.8)',borderRadius:6},
+      {label:'θ (Spillover)',data:[13.07,13.07,13.07],backgroundColor:'rgba(240,180,41,0.8)',borderRadius:6}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12}},
+      tooltip:{backgroundColor:'#162544',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(148,163,184,0.2)',borderWidth:1}},
+    scales:{y:{title:{display:true,text:'Coefficient'},grid:{color:'rgba(148,163,184,0.06)'}},x:{grid:{display:false}}}
+  }
+});
+
+new Chart(document.getElementById('controlChart'),{
+  type:'bar',
+  data:{
+    labels:['Tier 1 Ratio','Log Assets','Digital Index','CEO Age'],
+    datasets:[{
+      label:'Coefficient (ROA)',
+      data:[0.087,-0.002,0.099,0.003],
+      backgroundColor:['#34d399','#94a3b8','#4a8af4','#94a3b8'],
+      borderRadius:6
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:'#162544',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(148,163,184,0.2)',borderWidth:1}},
+    scales:{y:{title:{display:true,text:'Coefficient'},grid:{color:'rgba(148,163,184,0.06)'}},x:{grid:{display:false}}}
+  }
+});
+</script>
+
+</div>
+
+<footer>© 2025 Tatsuru Kikuchi · Center for Advanced Research in Finance · The University of Tokyo</footer>
+</body>
+</html>

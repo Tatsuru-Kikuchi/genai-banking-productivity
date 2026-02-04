@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<title>Research Overview — Innovation Tax</title>
+<style>
+:root {
+  --navy:#0a1628;--navy-light:#111d35;--navy-mid:#162544;
+  --blue:#2d6cdf;--blue-light:#4a8af4;--blue-glow:rgba(45,108,223,0.15);
+  --cyan:#38bdf8;--gold:#f0b429;--gold-dim:rgba(240,180,41,0.15);
+  --white:#f1f5f9;--gray:#94a3b8;--gray-dark:#475569;
+  --card-bg:rgba(22,37,68,0.6);--border:rgba(148,163,184,0.1);
+  --success:#34d399;--danger:#f87171;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(20px);background:rgba(10,22,40,0.85);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between}
+nav .logo{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--white);text-decoration:none;letter-spacing:-0.02em}
+nav .logo span{color:var(--gold)}
+nav ul{list-style:none;display:flex;gap:2rem}
+nav ul a{color:var(--gray);text-decoration:none;font-size:.85rem;font-weight:500;letter-spacing:.03em;text-transform:uppercase;transition:color .2s}
+nav ul a:hover{color:var(--white)}
+nav ul a.active{color:var(--gold)}
+.page-header{padding:7rem 2rem 3rem;max-width:1200px;margin:0 auto}
+.page-header .breadcrumb{font-size:.78rem;color:var(--gray);margin-bottom:1rem}
+.page-header .breadcrumb a{color:var(--blue-light);text-decoration:none}
+.page-header h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);letter-spacing:-0.02em;margin-bottom:.75rem}
+.page-header p{color:var(--gray);max-width:700px;font-size:1rem}
+.content{padding:0 2rem 4rem;max-width:1200px;margin:0 auto}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem}
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:2rem}
+.card h3{font-size:1.1rem;font-weight:600;margin-bottom:1rem}
+.card-label{font-size:.72rem;color:var(--blue-light);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:.75rem}
+.chart-wrap{position:relative;height:320px;width:100%}
+.chart-wrap canvas{width:100%!important;height:100%!important}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem}
+.kpi{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
+.kpi .val{font-family:'DM Serif Display',serif;font-size:1.8rem}
+.kpi .lbl{font-size:.75rem;color:var(--gray);margin-top:.25rem;text-transform:uppercase;letter-spacing:.06em}
+.kpi .val.pos{color:var(--success)}
+.kpi .val.neg{color:var(--danger)}
+.kpi .val.blue{color:var(--blue-light)}
+.kpi .val.gold{color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{text-align:left;padding:.75rem 1rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gray);border-bottom:2px solid var(--border);font-weight:600}
+td{padding:.65rem 1rem;border-bottom:1px solid var(--border)}
+tr:hover td{background:rgba(45,108,223,0.04)}
+.sig{color:var(--gold);font-weight:700;font-family:'JetBrains Mono',monospace;font-size:.8rem}
+.sig-none{color:var(--gray-dark)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:.82rem}
+.tab-bar{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab-btn{padding:.5rem 1.2rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.tab-btn.active,.tab-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.pipeline-flow{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:2rem 0}
+.pipe-box{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;text-align:center;flex:1;min-width:140px;transition:all .3s}
+.pipe-box:hover{border-color:var(--blue);transform:translateY(-2px)}
+.pipe-box .icon{font-size:1.6rem;margin-bottom:.5rem}
+.pipe-box h4{font-size:.88rem;margin-bottom:.25rem}
+.pipe-box p{font-size:.75rem;color:var(--gray)}
+.pipe-arrow{font-size:1.5rem;color:var(--gray-dark);flex-shrink:0}
+.eq-box{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--cyan);background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.15);padding:1.25rem 1.5rem;border-radius:10px;margin:1rem 0;line-height:1.8;overflow-x:auto}
+footer{border-top:1px solid var(--border);padding:2rem;max-width:1200px;margin:0 auto;text-align:center;font-size:.78rem;color:var(--gray-dark)}
+@media(max-width:768px){
+  nav ul{display:none}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .pipeline-flow{flex-direction:column}
+  .pipe-arrow{transform:rotate(90deg)}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Innovation<span>Tax</span></a>
+  <ul><li><a href="index.html" class="active">Overview</a></li>
+<li><a href="data.html">Data</a></li>
+<li><a href="dsdm.html">DSDM</a></li>
+<li><a href="sdid.html">SDID</a></li>
+<li><a href="network.html">Network</a></li>
+<li><a href="results.html">Results</a></li>
+
+    <li><a href="https://github.com/Tatsuru-Kikuchi/genai-banking-productivity" target="_blank">GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="page-header">
+  <div class="breadcrumb"><a href="index.html">Home</a> / Research Overview</div>
+  <h1>Research Overview</h1>
+  <p>Executive summary with key performance indicators and hypothesis testing results.</p>
+</div>
+
+<div class="content">
+
+<div class="kpi-row">
+  <div class="kpi"><div class="val gold">809</div><div class="lbl">Banks</div></div>
+  <div class="kpi"><div class="val blue">28</div><div class="lbl">Quarters</div></div>
+  <div class="kpi"><div class="val gold">24,270</div><div class="lbl">Observations</div></div>
+  <div class="kpi"><div class="val blue">95.4%</div><div class="lbl">CIK-RSSD Match</div></div>
+  <div class="kpi"><div class="val pos">4/4</div><div class="lbl">Hypotheses Confirmed</div></div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-label">Hypothesis Testing Summary</div>
+    <h3>All Four Hypotheses Confirmed</h3>
+    <table>
+      <thead><tr><th>Hypothesis</th><th>Result</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>H1: Frontier Selection</td><td><span class="sig">✓</span></td><td class="mono">β = 0.42*** (ROE, DSDM)</td></tr>
+        <tr><td>H2: Implementation Tax</td><td><span class="sig">✓</span></td><td class="mono">ATT = −4.28*** (ROE, SDID)</td></tr>
+        <tr><td>H3: Size Heterogeneity</td><td><span class="sig">✓</span></td><td class="mono">−517 vs −129 bp ROE</td></tr>
+        <tr><td>H4: Positive Spillovers</td><td><span class="sig">✓</span></td><td class="mono">θ = 3.13*** (Large ROE)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-label">The Productivity Paradox</div>
+    <h3>Innovation J-Curve</h3>
+    <div class="chart-wrap"><canvas id="jcurveChart"></canvas></div>
+  </div>
+</div>
+
+<div style="margin-top:1.5rem" class="grid-2">
+  <div class="card">
+    <div class="card-label">DSDM Key Parameters</div>
+    <h3>Direct vs Spillover Effects (ROE)</h3>
+    <div class="chart-wrap"><canvas id="paramChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-label">SDID Treatment Effects</div>
+    <h3>ATT by Bank Size (ROE, basis points)</h3>
+    <div class="chart-wrap"><canvas id="attChart"></canvas></div>
+  </div>
+</div>
+
+<script>
+Chart.defaults.color='#94a3b8';
+Chart.defaults.borderColor='rgba(148,163,184,0.1)';
+Chart.defaults.font.family="'DM Sans',sans-serif";
+
+// J-Curve
+new Chart(document.getElementById('jcurveChart'),{
+  type:'line',
+  data:{
+    labels:['Pre-Adoption','','Adoption (t=0)','','','','','Long-run'],
+    datasets:[{
+      label:'Productivity',
+      data:[100,100,100,96,93,91,94,98],
+      borderColor:'#4a8af4',
+      backgroundColor:'rgba(74,138,244,0.1)',
+      fill:true,
+      tension:0.4,
+      borderWidth:2.5,
+      pointRadius:[4,0,6,0,0,4,0,4],
+      pointBackgroundColor:'#4a8af4'
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:'#162544',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(148,163,184,0.2)',borderWidth:1}
+    },
+    scales:{
+      y:{title:{display:true,text:'Relative Productivity'},grid:{color:'rgba(148,163,184,0.06)'}},
+      x:{grid:{display:false}}
+    },
+    annotation:{annotations:{line1:{type:'line',xMin:2,xMax:2,borderColor:'rgba(240,180,41,0.5)',borderWidth:2,borderDash:[6,3]}}}
+  }
+});
+
+// Parameter comparison
+new Chart(document.getElementById('paramChart'),{
+  type:'bar',
+  data:{
+    labels:['Full Sample','Large Banks','Small Banks'],
+    datasets:[
+      {label:'β (Direct)',data:[0.4199,0.3622,0.4730],backgroundColor:'#4a8af4',borderRadius:6},
+      {label:'θ (Spillover)',data:[0.6787,3.1272,0.1502],backgroundColor:'#f0b429',borderRadius:6}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'top',labels:{usePointStyle:true,pointStyle:'rectRounded',padding:15}},
+      tooltip:{backgroundColor:'#162544',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(148,163,184,0.2)',borderWidth:1}
+    },
+    scales:{
+      y:{title:{display:true,text:'Coefficient Estimate'},grid:{color:'rgba(148,163,184,0.06)'}},
+      x:{grid:{display:false}}
+    }
+  }
+});
+
+// ATT chart
+new Chart(document.getElementById('attChart'),{
+  type:'bar',
+  data:{
+    labels:['Full Sample','Large Banks (Top 25%)','Small Banks (Bottom 75%)'],
+    datasets:[{
+      label:'ATT (ROE, bp)',
+      data:[-428,-129,-517],
+      backgroundColor:['#4a8af4','#34d399','#f87171'],
+      borderRadius:6
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    indexAxis:'y',
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:'#162544',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(148,163,184,0.2)',borderWidth:1,
+        callbacks:{label:ctx=>ctx.raw+' basis points'}}
+    },
+    scales:{
+      x:{title:{display:true,text:'ATT (basis points)'},grid:{color:'rgba(148,163,184,0.06)'}},
+      y:{grid:{display:false}}
+    }
+  }
+});
+</script>
+
+</div>
+
+<footer>© 2025 Tatsuru Kikuchi · Center for Advanced Research in Finance · The University of Tokyo</footer>
+</body>
+</html>

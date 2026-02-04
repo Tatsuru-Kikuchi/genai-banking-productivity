@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Innovation Tax — GenAI Banking Productivity Research Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0a1628;
+  --navy-light: #111d35;
+  --navy-mid: #162544;
+  --blue: #2d6cdf;
+  --blue-light: #4a8af4;
+  --blue-glow: rgba(45,108,223,0.15);
+  --cyan: #38bdf8;
+  --gold: #f0b429;
+  --gold-dim: rgba(240,180,41,0.15);
+  --white: #f1f5f9;
+  --gray: #94a3b8;
+  --gray-dark: #475569;
+  --card-bg: rgba(22,37,68,0.6);
+  --border: rgba(148,163,184,0.1);
+  --success: #34d399;
+  --danger: #f87171;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'DM Sans',sans-serif;
+  background:var(--navy);
+  color:var(--white);
+  line-height:1.6;
+  overflow-x:hidden;
+}
+/* Grain overlay */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:9999;
+}
+
+/* ── Navbar ── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  backdrop-filter:blur(20px);
+  background:rgba(10,22,40,0.85);
+  border-bottom:1px solid var(--border);
+  padding:0 2rem;
+  height:64px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+nav .logo {
+  font-family:'DM Serif Display',serif;
+  font-size:1.15rem;
+  color:var(--white);
+  text-decoration:none;
+  letter-spacing:-0.02em;
+}
+nav .logo span { color:var(--gold); }
+nav ul { list-style:none; display:flex; gap:2rem; }
+nav ul a {
+  color:var(--gray);
+  text-decoration:none;
+  font-size:0.85rem;
+  font-weight:500;
+  letter-spacing:0.03em;
+  text-transform:uppercase;
+  transition:color 0.2s;
+}
+nav ul a:hover { color:var(--white); }
+nav ul a.active { color:var(--gold); }
+
+/* ── Hero ── */
+.hero {
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:8rem 2rem 4rem;
+  position:relative;
+  overflow:hidden;
+}
+.hero::before {
+  content:'';
+  position:absolute;
+  top:-200px; left:50%;
+  transform:translateX(-50%);
+  width:900px; height:900px;
+  background:radial-gradient(ellipse, rgba(45,108,223,0.12) 0%, transparent 70%);
+  pointer-events:none;
+}
+.hero-badge {
+  display:inline-flex; align-items:center; gap:0.5rem;
+  padding:0.4rem 1rem;
+  background:var(--gold-dim);
+  border:1px solid rgba(240,180,41,0.3);
+  border-radius:100px;
+  font-size:0.78rem;
+  color:var(--gold);
+  font-weight:600;
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+  margin-bottom:2rem;
+  animation:fadeInUp 0.8s ease;
+}
+.hero h1 {
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(2.8rem,6vw,5.5rem);
+  line-height:1.05;
+  letter-spacing:-0.03em;
+  margin-bottom:1.5rem;
+  animation:fadeInUp 0.8s ease 0.1s both;
+}
+.hero h1 em {
+  font-style:normal;
+  background:linear-gradient(135deg,var(--blue-light),var(--cyan));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.hero .subtitle {
+  font-size:clamp(1rem,2vw,1.25rem);
+  color:var(--gray);
+  max-width:680px;
+  margin-bottom:3rem;
+  font-weight:300;
+  animation:fadeInUp 0.8s ease 0.2s both;
+}
+.hero-metrics {
+  display:flex; gap:1px;
+  background:var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  margin-bottom:3rem;
+  animation:fadeInUp 0.8s ease 0.3s both;
+}
+.hero-metric {
+  padding:1.5rem 2.5rem;
+  background:var(--card-bg);
+  text-align:center;
+}
+.hero-metric .val {
+  font-family:'DM Serif Display',serif;
+  font-size:1.8rem;
+  color:var(--white);
+}
+.hero-metric .lbl {
+  font-size:0.75rem;
+  color:var(--gray);
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  margin-top:0.25rem;
+}
+.hero-actions {
+  display:flex; gap:1rem;
+  animation:fadeInUp 0.8s ease 0.4s both;
+}
+.btn {
+  display:inline-flex; align-items:center; gap:0.5rem;
+  padding:0.8rem 2rem;
+  border-radius:10px;
+  font-size:0.9rem;
+  font-weight:600;
+  text-decoration:none;
+  transition:all 0.3s;
+  cursor:pointer;
+  border:none;
+}
+.btn-primary {
+  background:var(--blue);
+  color:#fff;
+  box-shadow:0 4px 20px rgba(45,108,223,0.3);
+}
+.btn-primary:hover {
+  background:var(--blue-light);
+  transform:translateY(-2px);
+  box-shadow:0 8px 30px rgba(45,108,223,0.4);
+}
+.btn-outline {
+  background:transparent;
+  color:var(--white);
+  border:1px solid var(--border);
+}
+.btn-outline:hover {
+  background:var(--card-bg);
+  border-color:var(--gray-dark);
+}
+
+/* ── Stat cards ── */
+.stats-strip {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1px;
+  background:var(--border);
+  max-width:1100px;
+  margin:-2rem auto 0;
+  border-radius:16px;
+  overflow:hidden;
+  animation:fadeInUp 0.8s ease 0.5s both;
+}
+.stat-card {
+  padding:2rem;
+  background:var(--navy-light);
+  text-align:center;
+}
+.stat-card .num {
+  font-family:'DM Serif Display',serif;
+  font-size:2rem;
+  background:linear-gradient(135deg,var(--gold),#f8d36a);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.stat-card .desc {
+  font-size:0.8rem;
+  color:var(--gray);
+  margin-top:0.3rem;
+}
+
+/* ── Section ── */
+section { padding:6rem 2rem; max-width:1200px; margin:0 auto; }
+.section-label {
+  font-size:0.75rem;
+  color:var(--blue-light);
+  text-transform:uppercase;
+  letter-spacing:0.12em;
+  font-weight:600;
+  margin-bottom:0.75rem;
+}
+.section-title {
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(1.8rem,4vw,2.8rem);
+  letter-spacing:-0.02em;
+  margin-bottom:1rem;
+}
+.section-desc {
+  color:var(--gray);
+  max-width:600px;
+  font-size:1rem;
+  margin-bottom:3rem;
+}
+
+/* ── Dashboard Grid ── */
+.dashboard-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+  gap:1.5rem;
+}
+.dash-card {
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:2rem;
+  transition:all 0.4s cubic-bezier(0.4,0,0.2,1);
+  text-decoration:none;
+  color:inherit;
+  display:block;
+  position:relative;
+  overflow:hidden;
+}
+.dash-card::before {
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:3px;
+  background:linear-gradient(90deg,var(--blue),var(--cyan));
+  opacity:0;
+  transition:opacity 0.3s;
+}
+.dash-card:hover {
+  border-color:rgba(45,108,223,0.3);
+  transform:translateY(-4px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+}
+.dash-card:hover::before { opacity:1; }
+.dash-icon {
+  width:48px; height:48px;
+  border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem;
+  margin-bottom:1.25rem;
+}
+.dash-card h3 {
+  font-size:1.15rem;
+  font-weight:600;
+  margin-bottom:0.5rem;
+}
+.dash-card p {
+  font-size:0.88rem;
+  color:var(--gray);
+  margin-bottom:1.25rem;
+  line-height:1.5;
+}
+.dash-tags {
+  display:flex; flex-wrap:wrap; gap:0.4rem;
+}
+.dash-tag {
+  padding:0.2rem 0.6rem;
+  background:rgba(45,108,223,0.1);
+  border:1px solid rgba(45,108,223,0.15);
+  border-radius:6px;
+  font-size:0.72rem;
+  color:var(--blue-light);
+  font-weight:500;
+}
+.dash-arrow {
+  position:absolute;
+  top:2rem; right:2rem;
+  color:var(--gray-dark);
+  transition:all 0.3s;
+  font-size:1.2rem;
+}
+.dash-card:hover .dash-arrow {
+  color:var(--blue-light);
+  transform:translate(4px,-4px);
+}
+
+/* ── Methodology ── */
+.method-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:3rem;
+  align-items:start;
+}
+.method-list { display:flex; flex-direction:column; gap:1.25rem; }
+.method-item {
+  display:flex; gap:1rem; align-items:flex-start;
+  padding:1.25rem;
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:12px;
+  transition:border-color 0.3s;
+}
+.method-item:hover { border-color:rgba(45,108,223,0.3); }
+.method-num {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.75rem;
+  color:var(--blue-light);
+  background:var(--blue-glow);
+  padding:0.3rem 0.6rem;
+  border-radius:6px;
+  flex-shrink:0;
+  font-weight:500;
+}
+.method-item h4 { font-size:0.95rem; margin-bottom:0.3rem; }
+.method-item p { font-size:0.82rem; color:var(--gray); }
+.method-framework {
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:2.5rem;
+}
+.method-framework h3 {
+  font-family:'DM Serif Display',serif;
+  font-size:1.4rem;
+  margin-bottom:1.5rem;
+}
+.framework-eq {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.85rem;
+  color:var(--cyan);
+  background:rgba(56,189,248,0.08);
+  border:1px solid rgba(56,189,248,0.15);
+  padding:1rem 1.5rem;
+  border-radius:10px;
+  margin-bottom:1.5rem;
+  overflow-x:auto;
+  line-height:1.8;
+}
+.param-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0.75rem;
+}
+.param-item {
+  display:flex; align-items:baseline; gap:0.5rem;
+  font-size:0.85rem;
+}
+.param-item code {
+  font-family:'JetBrains Mono',monospace;
+  color:var(--gold);
+  font-weight:500;
+}
+.param-item span { color:var(--gray); }
+
+/* ── Findings ── */
+.findings-grid {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1.5rem;
+}
+.finding-card {
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:2rem;
+  text-align:center;
+  transition:all 0.3s;
+}
+.finding-card:hover {
+  border-color:rgba(45,108,223,0.3);
+  transform:translateY(-2px);
+}
+.finding-val {
+  font-family:'DM Serif Display',serif;
+  font-size:2rem;
+  margin-bottom:0.25rem;
+}
+.finding-val.positive { color:var(--success); }
+.finding-val.negative { color:var(--danger); }
+.finding-val.neutral { color:var(--blue-light); }
+.finding-label {
+  font-size:0.82rem;
+  color:var(--gray);
+  line-height:1.4;
+}
+
+/* ── Footer ── */
+footer {
+  border-top:1px solid var(--border);
+  padding:3rem 2rem;
+  max-width:1200px;
+  margin:0 auto;
+  display:flex;
+  justify-content:space-between;
+  align-items:start;
+  gap:2rem;
+  flex-wrap:wrap;
+}
+footer .foot-brand {
+  font-family:'DM Serif Display',serif;
+  font-size:1.1rem;
+  margin-bottom:0.5rem;
+}
+footer .foot-desc { font-size:0.82rem; color:var(--gray); max-width:360px; }
+footer .foot-links h4 {
+  font-size:0.72rem;
+  text-transform:uppercase;
+  letter-spacing:0.1em;
+  color:var(--gray-dark);
+  margin-bottom:0.75rem;
+}
+footer .foot-links a {
+  display:block;
+  color:var(--gray);
+  text-decoration:none;
+  font-size:0.85rem;
+  padding:0.2rem 0;
+  transition:color 0.2s;
+}
+footer .foot-links a:hover { color:var(--white); }
+footer .foot-copy {
+  width:100%;
+  text-align:center;
+  padding-top:2rem;
+  margin-top:2rem;
+  border-top:1px solid var(--border);
+  font-size:0.78rem;
+  color:var(--gray-dark);
+}
+
+/* ── Animations ── */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(30px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.fade-in {
+  opacity:0; transform:translateY(30px);
+  transition:all 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.fade-in.visible { opacity:1; transform:translateY(0); }
+
+/* ── Responsive ── */
+@media(max-width:768px) {
+  nav ul { display:none; }
+  .hero-metrics { flex-direction:column; }
+  .stats-strip { grid-template-columns:1fr 1fr; }
+  .dashboard-grid { grid-template-columns:1fr; }
+  .method-grid { grid-template-columns:1fr; }
+  .findings-grid { grid-template-columns:1fr 1fr; }
+  .param-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav>
+  <a href="index.html" class="logo">Innovation<span>Tax</span></a>
+  <ul>
+    <li><a href="#overview" class="active">Overview</a></li>
+    <li><a href="#dashboards">Dashboards</a></li>
+    <li><a href="#methodology">Methodology</a></li>
+    <li><a href="#findings">Results</a></li>
+    <li><a href="https://github.com/Tatsuru-Kikuchi/genai-banking-productivity" target="_blank">GitHub</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="overview">
+  <div class="hero-badge">◆ Working Paper — University of Tokyo</div>
+  <h1>The <em>Innovation Tax</em></h1>
+  <p class="subtitle">Generative AI Adoption, Productivity Paradox, and Systemic Risk in the U.S. Banking Sector — an interactive research platform with comprehensive empirical evidence.</p>
+
+  <div class="hero-metrics">
+    <div class="hero-metric">
+      <div class="val">809</div>
+      <div class="lbl">U.S. Banks</div>
+    </div>
+    <div class="hero-metric">
+      <div class="val">2018–2025</div>
+      <div class="lbl">Quarterly Panel</div>
+    </div>
+    <div class="hero-metric">
+      <div class="val">24,270</div>
+      <div class="lbl">Observations</div>
+    </div>
+    <div class="hero-metric">
+      <div class="val">DSDM + SDID</div>
+      <div class="lbl">Dual Methods</div>
+    </div>
+  </div>
+
+  <div class="hero-actions">
+    <a href="#dashboards" class="btn btn-primary">Explore Dashboards ↓</a>
+    <a href="results.html" class="btn btn-outline">View Results →</a>
+  </div>
+</section>
+
+<!-- Key Stats -->
+<div class="stats-strip">
+  <div class="stat-card">
+    <div class="num">β > 0</div>
+    <div class="desc">AI Adopters Are High Performers</div>
+  </div>
+  <div class="stat-card">
+    <div class="num">ATT < 0</div>
+    <div class="desc">Adoption Causes Short-Term Decline</div>
+  </div>
+  <div class="stat-card">
+    <div class="num">4× Gap</div>
+    <div class="desc">Small vs Large Bank Tax</div>
+  </div>
+  <div class="stat-card">
+    <div class="num">θ = 3.13</div>
+    <div class="desc">Large Bank ROE Spillovers</div>
+  </div>
+</div>
+
+<!-- Dashboards -->
+<section id="dashboards">
+  <div class="section-label">Interactive Dashboards</div>
+  <div class="section-title">Explore the Research</div>
+  <p class="section-desc">Navigate comprehensive findings through interactive visualizations, from data pipeline to causal inference and systemic risk analysis.</p>
+
+  <div class="dashboard-grid">
+    <a href="overview.html" class="dash-card">
+      <div class="dash-icon" style="background:rgba(45,108,223,0.12);color:var(--blue-light)">📊</div>
+      <span class="dash-arrow">↗</span>
+      <h3>Research Overview</h3>
+      <p>Executive summary with key KPIs, hypothesis testing results, and comprehensive research highlights.</p>
+      <div class="dash-tags">
+        <span class="dash-tag">KPI Dashboard</span>
+        <span class="dash-tag">Hypothesis Tests</span>
+        <span class="dash-tag">Summary</span>
+      </div>
+    </a>
+
+    <a href="data.html" class="dash-card">
+      <div class="dash-icon" style="background:rgba(52,211,153,0.12);color:var(--success)">🗄️</div>
+      <span class="dash-arrow">↗</span>
+      <h3>Data Pipeline</h3>
+      <p>Interactive data source visualization, sample construction pipeline, and variable definitions.</p>
+      <div class="dash-tags">
+        <span class="dash-tag">SEC EDGAR</span>
+        <span class="dash-tag">FR Y-9C</span>
+        <span class="dash-tag">Pipeline Flow</span>
+      </div>
+    </a>
+
+    <a href="dsdm.html" class="dash-card">
+      <div class="dash-icon" style="background:rgba(240,180,41,0.12);color:var(--gold)">📈</div>
+      <span class="dash-arrow">↗</span>
+      <h3>DSDM Results</h3>
+      <p>Dynamic Spatial Durbin Model estimates with interactive parameter comparison across methods and samples.</p>
+      <div class="dash-tags">
+        <span class="dash-tag">Spatial Spillovers</span>
+        <span class="dash-tag">β & θ Effects</span>
+        <span class="dash-tag">Controls</span>
+      </div>
+    </a>
+
+    <a href="sdid.html" class="dash-card">
+      <div class="dash-icon" style="background:rgba(248,113,113,0.12);color:var(--danger)">🔬</div>
+      <span class="dash-arrow">↗</span>
+      <h3>SDID Causal Inference</h3>
+      <p>Synthetic Difference-in-Differences results, event study dynamics, and the productivity paradox.</p>
+      <div class="dash-tags">
+        <span class="dash-tag">Event Study</span>
+        <span class="dash-tag">ATT Estimates</span>
+        <span class="dash-tag">J-Curve</span>
+      </div>
+    </a>
+
+    <a href="network.html" class="dash-card">
+      <div class="dash-icon" style="background:rgba(56,189,248,0.12);color:var(--cyan)">🌐</div>
+      <span class="dash-arrow">↗</span>
+      <h3>Network & Heterogeneity</h3>
+      <p>Bank size heterogeneity, algorithmic coupling analysis, and systemic risk implications.</p>
+      <div class="dash-tags">
+        <span class="dash-tag">Size Effects</span>
+        <span class="dash-tag">Spillover 20×</span>
+        <span class="dash-tag">Systemic Core</span>
+      </div>
+    </a>
+
+    <a href="results.html" class="dash-card">
+      <div class="dash-icon" style="background:rgba(148,163,184,0.12);color:var(--gray)">📋</div>
+      <span class="dash-arrow">↗</span>
+      <h3>Results Explorer</h3>
+      <p>Complete regression tables, robustness checks, and full estimation output with filtering capabilities.</p>
+      <div class="dash-tags">
+        <span class="dash-tag">Full Tables</span>
+        <span class="dash-tag">Robustness</span>
+        <span class="dash-tag">Export</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- Methodology -->
+<section id="methodology" class="fade-in">
+  <div class="section-label">Econometric Framework</div>
+  <div class="section-title">Dual Identification Strategy</div>
+  <p class="section-desc">Combining spatial econometrics with causal inference to resolve the AI productivity paradox in banking.</p>
+
+  <div class="method-grid">
+    <div class="method-list">
+      <div class="method-item">
+        <span class="method-num">01</span>
+        <div>
+          <h4>SEC EDGAR Text Mining</h4>
+          <p>Regex extraction of GenAI keywords from 10-Q filings to construct treatment indicator.</p>
+        </div>
+      </div>
+      <div class="method-item">
+        <span class="method-num">02</span>
+        <div>
+          <h4>CIK-RSSD Mapping</h4>
+          <p>NY Fed CRSP-FRB Link crosswalk bridges SEC and Federal Reserve identifiers (95.4% match).</p>
+        </div>
+      </div>
+      <div class="method-item">
+        <span class="method-num">03</span>
+        <div>
+          <h4>Dynamic Spatial Durbin Model</h4>
+          <p>Captures direct AI effects (β), spatial spillovers (θ), temporal persistence (τ), and spatial lag (ρ).</p>
+        </div>
+      </div>
+      <div class="method-item">
+        <span class="method-num">04</span>
+        <div>
+          <h4>Synthetic DiD (SDID)</h4>
+          <p>Causal identification using ChatGPT release (Nov 2022) as exogenous shock. Relaxes parallel trends.</p>
+        </div>
+      </div>
+      <div class="method-item">
+        <span class="method-num">05</span>
+        <div>
+          <h4>Heterogeneity Analysis</h4>
+          <p>Split-sample estimation by bank size reveals 20× stronger spillovers among large banks.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="method-framework">
+      <h3>DSDM Specification</h3>
+      <div class="framework-eq">
+Y<sub>it</sub> = τY<sub>i,t-1</sub> + ρΣ<sub>j</sub>w<sub>ij</sub>Y<sub>jt</sub> + βD<sup>AI</sup><sub>it</sub> + θΣ<sub>j</sub>w<sub>ij</sub>D<sup>AI</sup><sub>jt</sub> + γ'X<sub>it</sub> + μ<sub>i</sub> + δ<sub>t</sub> + ε<sub>it</sub>
+      </div>
+      <div class="param-grid">
+        <div class="param-item"><code>β</code> <span>Direct effect of own AI adoption</span></div>
+        <div class="param-item"><code>θ</code> <span>Spillover from peer AI adoption</span></div>
+        <div class="param-item"><code>τ</code> <span>Temporal persistence</span></div>
+        <div class="param-item"><code>ρ</code> <span>Spatial autocorrelation</span></div>
+        <div class="param-item"><code>W</code> <span>Spatial weight matrix</span></div>
+        <div class="param-item"><code>X</code> <span>Control variables</span></div>
+        <div class="param-item"><code>μ<sub>i</sub></code> <span>Bank fixed effects</span></div>
+        <div class="param-item"><code>δ<sub>t</sub></code> <span>Time fixed effects</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Key Findings -->
+<section id="findings" class="fade-in">
+  <div class="section-label">Key Results</div>
+  <div class="section-title">Evidence-Based Findings</div>
+  <p class="section-desc">Four testable hypotheses — all confirmed with rigorous econometric evidence.</p>
+
+  <div class="findings-grid">
+    <div class="finding-card">
+      <div class="finding-val positive">β = 0.42***</div>
+      <div class="finding-label">AI adopters earn +42 bp higher ROE — frontier selection confirmed (H1)</div>
+    </div>
+    <div class="finding-card">
+      <div class="finding-val negative">ATT = −4.28***</div>
+      <div class="finding-label">AI adoption causes −428 bp ROE decline — implementation tax (H2)</div>
+    </div>
+    <div class="finding-card">
+      <div class="finding-val neutral">−517 vs −129</div>
+      <div class="finding-label">Small banks suffer 4× larger ROE tax than large banks (H3)</div>
+    </div>
+    <div class="finding-card">
+      <div class="finding-val positive">θ = 3.13***</div>
+      <div class="finding-label">Large bank ROE spillovers — algorithmic coupling in systemic core (H4)</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:3rem;">
+    <a href="results.html" class="btn btn-primary">Explore All Results →</a>
+    <a href="https://github.com/Tatsuru-Kikuchi/genai-banking-productivity" class="btn btn-outline" target="_blank">View Code on GitHub ↗</a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div>
+    <div class="foot-brand">The Innovation Tax</div>
+    <div class="foot-desc">Comprehensive research platform analyzing GenAI adoption effects on U.S. banking productivity through spatial econometrics and causal inference.</div>
+  </div>
+  <div class="foot-links">
+    <h4>Dashboards</h4>
+    <a href="overview.html">Research Overview</a>
+    <a href="data.html">Data Pipeline</a>
+    <a href="dsdm.html">DSDM Results</a>
+    <a href="sdid.html">SDID Causal Inference</a>
+    <a href="network.html">Network Effects</a>
+    <a href="results.html">Results Explorer</a>
+  </div>
+  <div class="foot-links">
+    <h4>Resources</h4>
+    <a href="https://github.com/Tatsuru-Kikuchi/genai-banking-productivity" target="_blank">GitHub Repository</a>
+    <a href="https://github.com/Tatsuru-Kikuchi/genai-banking-productivity/blob/main/docs/DATA_DICTIONARY.md" target="_blank">Data Dictionary</a>
+  </div>
+  <div class="foot-copy">© 2025 Tatsuru Kikuchi · Center for Advanced Research in Finance · The University of Tokyo</div>
+</footer>
+
+<script>
+// Scroll-triggered fade-in
+const obs = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+},{threshold:0.1});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

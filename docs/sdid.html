@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<title>SDID Causal Inference — Innovation Tax</title>
+<style>
+:root {
+  --navy:#0a1628;--navy-light:#111d35;--navy-mid:#162544;
+  --blue:#2d6cdf;--blue-light:#4a8af4;--blue-glow:rgba(45,108,223,0.15);
+  --cyan:#38bdf8;--gold:#f0b429;--gold-dim:rgba(240,180,41,0.15);
+  --white:#f1f5f9;--gray:#94a3b8;--gray-dark:#475569;
+  --card-bg:rgba(22,37,68,0.6);--border:rgba(148,163,184,0.1);
+  --success:#34d399;--danger:#f87171;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(20px);background:rgba(10,22,40,0.85);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between}
+nav .logo{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--white);text-decoration:none;letter-spacing:-0.02em}
+nav .logo span{color:var(--gold)}
+nav ul{list-style:none;display:flex;gap:2rem}
+nav ul a{color:var(--gray);text-decoration:none;font-size:.85rem;font-weight:500;letter-spacing:.03em;text-transform:uppercase;transition:color .2s}
+nav ul a:hover{color:var(--white)}
+nav ul a.active{color:var(--gold)}
+.page-header{padding:7rem 2rem 3rem;max-width:1200px;margin:0 auto}
+.page-header .breadcrumb{font-size:.78rem;color:var(--gray);margin-bottom:1rem}
+.page-header .breadcrumb a{color:var(--blue-light);text-decoration:none}
+.page-header h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);letter-spacing:-0.02em;margin-bottom:.75rem}
+.page-header p{color:var(--gray);max-width:700px;font-size:1rem}
+.content{padding:0 2rem 4rem;max-width:1200px;margin:0 auto}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem}
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:2rem}
+.card h3{font-size:1.1rem;font-weight:600;margin-bottom:1rem}
+.card-label{font-size:.72rem;color:var(--blue-light);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:.75rem}
+.chart-wrap{position:relative;height:320px;width:100%}
+.chart-wrap canvas{width:100%!important;height:100%!important}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem}
+.kpi{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
+.kpi .val{font-family:'DM Serif Display',serif;font-size:1.8rem}
+.kpi .lbl{font-size:.75rem;color:var(--gray);margin-top:.25rem;text-transform:uppercase;letter-spacing:.06em}
+.kpi .val.pos{color:var(--success)}
+.kpi .val.neg{color:var(--danger)}
+.kpi .val.blue{color:var(--blue-light)}
+.kpi .val.gold{color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{text-align:left;padding:.75rem 1rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gray);border-bottom:2px solid var(--border);font-weight:600}
+td{padding:.65rem 1rem;border-bottom:1px solid var(--border)}
+tr:hover td{background:rgba(45,108,223,0.04)}
+.sig{color:var(--gold);font-weight:700;font-family:'JetBrains Mono',monospace;font-size:.8rem}
+.sig-none{color:var(--gray-dark)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:.82rem}
+.tab-bar{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab-btn{padding:.5rem 1.2rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.tab-btn.active,.tab-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.pipeline-flow{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:2rem 0}
+.pipe-box{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;text-align:center;flex:1;min-width:140px;transition:all .3s}
+.pipe-box:hover{border-color:var(--blue);transform:translateY(-2px)}
+.pipe-box .icon{font-size:1.6rem;margin-bottom:.5rem}
+.pipe-box h4{font-size:.88rem;margin-bottom:.25rem}
+.pipe-box p{font-size:.75rem;color:var(--gray)}
+.pipe-arrow{font-size:1.5rem;color:var(--gray-dark);flex-shrink:0}
+.eq-box{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--cyan);background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.15);padding:1.25rem 1.5rem;border-radius:10px;margin:1rem 0;line-height:1.8;overflow-x:auto}
+footer{border-top:1px solid var(--border);padding:2rem;max-width:1200px;margin:0 auto;text-align:center;font-size:.78rem;color:var(--gray-dark)}
+@media(max-width:768px){
+  nav ul{display:none}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .pipeline-flow{flex-direction:column}
+  .pipe-arrow{transform:rotate(90deg)}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Innovation<span>Tax</span></a>
+  <ul><li><a href="index.html">Overview</a></li>
+<li><a href="data.html">Data</a></li>
+<li><a href="dsdm.html">DSDM</a></li>
+<li><a href="sdid.html" class="active">SDID</a></li>
+<li><a href="network.html">Network</a></li>
+<li><a href="results.html">Results</a></li>
+
+    <li><a href="https://github.com/Tatsuru-Kikuchi/genai-banking-productivity" target="_blank">GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="page-header">
+  <div class="breadcrumb"><a href="index.html">Home</a> / SDID Causal Inference</div>
+  <h1>SDID Causal Inference</h1>
+  <p>Synthetic Difference-in-Differences results using the ChatGPT release (Nov 2022) as an exogenous shock.</p>
+</div>
+
+<div class="content">
+
+<div class="kpi-row">
+  <div class="kpi"><div class="val neg">−0.456**</div><div class="lbl">ROA ATT (Full)</div></div>
+  <div class="kpi"><div class="val neg">−4.282***</div><div class="lbl">ROE ATT (Full)</div></div>
+  <div class="kpi"><div class="val blue">10</div><div class="lbl">Treated Banks</div></div>
+  <div class="kpi"><div class="val blue">36</div><div class="lbl">Control Banks</div></div>
+</div>
+
+<div class="card" style="margin-bottom:1.5rem">
+  <div class="card-label">Identification Strategy</div>
+  <div class="eq-box">ATT = E[Y<sub>it</sub>(1) − Y<sub>it</sub>(0) | D<sub>it</sub> = 1]</div>
+  <p style="color:var(--gray);font-size:.88rem">Treatment: First GenAI keyword mention in SEC filing post-2023Q1. Shock: ChatGPT release (November 2022). SDID combines synthetic control weights with DiD, relaxing the parallel trends assumption.</p>
+</div>
+
+<div class="tab-bar" id="sdid-tabs">
+  <button class="tab-btn active" data-tab="bayesian">Bayesian</button>
+  <button class="tab-btn" data-tab="mle">MLE</button>
+  <button class="tab-btn" data-tab="qmle">Q-MLE</button>
+</div>
+
+<div id="sdid-table">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-label">ROA Results</div>
+    <h3>ATT Estimates — Return on Assets</h3>
+    <table>
+      <thead><tr><th>Sample</th><th>ATT</th><th>SE</th><th>p-value</th><th>N<sub>tr</sub></th></tr></thead>
+      <tbody id="roa-body">
+        <tr><td>Full Sample</td><td class="mono">−0.4563 <span class="sig">**</span></td><td class="mono">0.1767</td><td class="mono">0.012</td><td>10</td></tr>
+        <tr><td>Top 25% (Large)</td><td class="mono">−0.1590 <span class="sig">***</span></td><td class="mono">0.0526</td><td class="mono">0.000</td><td>4</td></tr>
+        <tr><td>Bottom 75% (Small)</td><td class="mono">−0.5939 <span class="sig">**</span></td><td class="mono">0.2821</td><td class="mono">0.022</td><td>6</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-label">ROE Results</div>
+    <h3>ATT Estimates — Return on Equity</h3>
+    <table>
+      <thead><tr><th>Sample</th><th>ATT</th><th>SE</th><th>p-value</th><th>N<sub>tr</sub></th></tr></thead>
+      <tbody id="roe-body">
+        <tr><td>Full Sample</td><td class="mono">−4.2819 <span class="sig">***</span></td><td class="mono">0.8867</td><td class="mono">0.000</td><td>10</td></tr>
+        <tr><td>Top 25% (Large)</td><td class="mono">−1.2861 <span class="sig">***</span></td><td class="mono">0.5272</td><td class="mono">0.004</td><td>4</td></tr>
+        <tr><td>Bottom 75% (Small)</td><td class="mono">−5.1672 <span class="sig">***</span></td><td class="mono">1.7413</td><td class="mono">0.000</td><td>6</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<div style="margin-top:1.5rem" class="grid-2">
+  <div class="card">
+    <div class="card-label">Size Heterogeneity</div>
+    <h3>Implementation Tax by Bank Size (ROE, bp)</h3>
+    <div class="chart-wrap"><canvas id="sizeChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-label">The Productivity Paradox</div>
+    <h3>J-Curve: β > 0 yet ATT < 0</h3>
+    <div class="chart-wrap"><canvas id="paradoxChart"></canvas></div>
+  </div>
+</div>
+
+<div style="margin-top:1.5rem" class="grid-2">
+  <div class="card">
+    <div class="card-label">Event Study Dynamics</div>
+    <h3>ROE Event Study (Simulated)</h3>
+    <div class="chart-wrap"><canvas id="eventROE"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-label">Event Study Dynamics</div>
+    <h3>ROA Event Study (Simulated)</h3>
+    <div class="chart-wrap"><canvas id="eventROA"></canvas></div>
+  </div>
+</div>
+
+<script>
+Chart.defaults.color='#94a3b8';
+Chart.defaults.borderColor='rgba(148,163,184,0.1)';
+Chart.defaults.font.family="'DM Sans',sans-serif";
+
+// Tab switching
+document.querySelectorAll('#sdid-tabs .tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#sdid-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+new Chart(document.getElementById('sizeChart'),{
+  type:'bar',
+  data:{
+    labels:['Full Sample','Large Banks\n(Top 25%)','Small Banks\n(Bottom 75%)'],
+    datasets:[
+      {label:'ROA (bp)',data:[-45.6,-15.9,-59.4],backgroundColor:'rgba(74,138,244,0.7)',borderRadius:6},
+      {label:'ROE (bp)',data:[-428,-129,-517],backgroundColor:'rgba(248,113,113,0.7)',borderRadius:6}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12}},
+      tooltip:{backgroundColor:'#162544',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(148,163,184,0.2)',borderWidth:1}},
+    scales:{y:{title:{display:true,text:'ATT (basis points)'},grid:{color:'rgba(148,163,184,0.06)'}},x:{grid:{display:false}}}
+  }
+});
+
+new Chart(document.getElementById('paradoxChart'),{
+  type:'scatter',
+  data:{
+    datasets:[{
+      label:'Banks',
+      data:[
+        {x:0.37,y:-45.6,r:15},{x:0.42,y:-428,r:20},
+        {x:0.44,y:-15.9,r:10},{x:0.36,y:-129,r:12},
+        {x:0.47,y:-59.4,r:10},{x:0.38,y:-517,r:12}
+      ],
+      backgroundColor:['rgba(74,138,244,0.6)','rgba(74,138,244,0.6)','rgba(52,211,153,0.6)','rgba(52,211,153,0.6)','rgba(248,113,113,0.6)','rgba(248,113,113,0.6)'],
+      borderColor:['#4a8af4','#4a8af4','#34d399','#34d399','#f87171','#f87171'],
+      borderWidth:2
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:'#162544',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(148,163,184,0.2)',borderWidth:1}},
+    scales:{
+      x:{title:{display:true,text:'β (Direct Effect, DSDM)'},grid:{color:'rgba(148,163,184,0.06)'}},
+      y:{title:{display:true,text:'ATT (SDID, bp)'},grid:{color:'rgba(148,163,184,0.06)'}}
+    }
+  }
+});
+
+// Event study charts
+function makeEventStudy(id,data,color,label){
+  const labels = ['-8','-7','-6','-5','-4','-3','-2','-1','0','1','2','3','4','5','6','7','8'];
+  new Chart(document.getElementById(id),{
+    type:'line',
+    data:{
+      labels:labels,
+      datasets:[
+        {label:label,data:data,borderColor:color,backgroundColor:color+'33',fill:true,tension:0.3,borderWidth:2.5,pointRadius:3,pointBackgroundColor:color},
+        {label:'Zero',data:Array(17).fill(0),borderColor:'rgba(148,163,184,0.3)',borderWidth:1,borderDash:[5,5],pointRadius:0,fill:false}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{backgroundColor:'#162544',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(148,163,184,0.2)',borderWidth:1}},
+      scales:{
+        y:{title:{display:true,text:'Treatment Effect'},grid:{color:'rgba(148,163,184,0.06)'}},
+        x:{title:{display:true,text:'Quarters Relative to Treatment'},grid:{color:'rgba(148,163,184,0.04)'}}
+      }
+    }
+  });
+}
+
+makeEventStudy('eventROE',
+  [0.3,0.1,-0.2,0.4,0.2,-0.1,0.3,0.1, -1.5,-2.8,-3.5,-4.1,-4.3,-4.0,-4.5,-4.2,-4.3],
+  '#f87171','ROE ATT');
+
+makeEventStudy('eventROA',
+  [0.05,0.02,-0.03,0.04,0.03,-0.01,0.02,0.01, -0.15,-0.28,-0.35,-0.42,-0.45,-0.40,-0.48,-0.44,-0.46],
+  '#4a8af4','ROA ATT');
+</script>
+
+</div>
+
+<footer>© 2025 Tatsuru Kikuchi · Center for Advanced Research in Finance · The University of Tokyo</footer>
+</body>
+</html>
