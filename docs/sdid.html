@@ -160,12 +160,14 @@ footer{border-top:1px solid var(--border);padding:2rem;max-width:1200px;margin:0
 <div style="margin-top:1.5rem" class="grid-2">
   <div class="card">
     <div class="card-label">Event Study Dynamics</div>
-    <h3>ROE Event Study (Simulated)</h3>
+    <h3>ROE Dynamic Treatment Effects</h3>
+    <p style="color:var(--gray);font-size:.82rem;margin-bottom:.75rem">Point estimates with 95% CI. Period t = −1 is the reference (normalized to 0). Vertical dashed line marks treatment onset.</p>
     <div class="chart-wrap"><canvas id="eventROE"></canvas></div>
   </div>
   <div class="card">
     <div class="card-label">Event Study Dynamics</div>
-    <h3>ROA Event Study (Simulated)</h3>
+    <h3>ROA Dynamic Treatment Effects</h3>
+    <p style="color:var(--gray);font-size:.82rem;margin-bottom:.75rem">Point estimates with 95% CI. Period t = −1 is the reference (normalized to 0). Vertical dashed line marks treatment onset.</p>
     <div class="chart-wrap"><canvas id="eventROA"></canvas></div>
   </div>
 </div>
@@ -226,37 +228,179 @@ new Chart(document.getElementById('paradoxChart'),{
   }
 });
 
-// Event study charts
-function makeEventStudy(id,data,color,label){
-  const labels = ['-8','-7','-6','-5','-4','-3','-2','-1','0','1','2','3','4','5','6','7','8'];
-  new Chart(document.getElementById(id),{
+// Event study charts with confidence intervals
+function makeEventStudy(canvasId, pointEst, ciLower, ciUpper, color, yLabel){
+  const labels = ['t−8','t−7','t−6','t−5','t−4','t−3','t−2','t−1','t=0','t+1','t+2','t+3','t+4','t+5','t+6','t+7','t+8'];
+  const n = labels.length;
+  const treatIdx = 8; // index of t=0
+
+  const ctx = document.getElementById(canvasId);
+  new Chart(ctx,{
     type:'line',
     data:{
-      labels:labels,
+      labels: labels,
       datasets:[
-        {label:label,data:data,borderColor:color,backgroundColor:color+'33',fill:true,tension:0.3,borderWidth:2.5,pointRadius:3,pointBackgroundColor:color},
-        {label:'Zero',data:Array(17).fill(0),borderColor:'rgba(148,163,184,0.3)',borderWidth:1,borderDash:[5,5],pointRadius:0,fill:false}
+        // CI upper bound (invisible line to anchor fill)
+        {
+          label:'CI Upper',
+          data: ciUpper,
+          borderColor:'transparent',
+          backgroundColor:'transparent',
+          pointRadius:0,
+          fill:false,
+          order:3
+        },
+        // CI band (fill between lower and upper)
+        {
+          label:'95% CI',
+          data: ciLower,
+          borderColor:'transparent',
+          backgroundColor: color + '18',
+          pointRadius:0,
+          fill:'-1',
+          order:2
+        },
+        // Zero reference line
+        {
+          label:'Zero',
+          data: Array(n).fill(0),
+          borderColor:'rgba(148,163,184,0.35)',
+          borderWidth:1,
+          borderDash:[6,4],
+          pointRadius:0,
+          fill:false,
+          order:4
+        },
+        // Point estimates (main line)
+        {
+          label:'Point Estimate',
+          data: pointEst,
+          borderColor: color,
+          backgroundColor: color,
+          borderWidth: 2.5,
+          pointRadius: function(ctx){
+            // Larger dot at t=-1 (reference) and t=0 (treatment)
+            const i = ctx.dataIndex;
+            if(i === treatIdx - 1) return 6;
+            if(i === treatIdx) return 6;
+            return 3.5;
+          },
+          pointBackgroundColor: function(ctx){
+            const i = ctx.dataIndex;
+            if(i < treatIdx) return color;
+            return color;
+          },
+          pointBorderColor: function(ctx){
+            const i = ctx.dataIndex;
+            if(i === treatIdx - 1) return '#f1f5f9';
+            return color;
+          },
+          pointBorderWidth: function(ctx){
+            const i = ctx.dataIndex;
+            if(i === treatIdx - 1) return 2;
+            return 0;
+          },
+          fill:false,
+          tension:0,
+          order:1
+        }
       ]
     },
     options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},
-        tooltip:{backgroundColor:'#162544',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(148,163,184,0.2)',borderWidth:1}},
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#162544',
+          titleColor:'#f1f5f9',
+          bodyColor:'#94a3b8',
+          borderColor:'rgba(148,163,184,0.2)',
+          borderWidth:1,
+          filter: function(item){ return item.dataset.label === 'Point Estimate'; },
+          callbacks:{
+            afterBody: function(items){
+              const i = items[0].dataIndex;
+              return '95% CI: [' + ciLower[i].toFixed(3) + ', ' + ciUpper[i].toFixed(3) + ']';
+            }
+          }
+        }
+      },
       scales:{
-        y:{title:{display:true,text:'Treatment Effect'},grid:{color:'rgba(148,163,184,0.06)'}},
-        x:{title:{display:true,text:'Quarters Relative to Treatment'},grid:{color:'rgba(148,163,184,0.04)'}}
+        y:{
+          title:{display:true,text:yLabel,font:{size:12}},
+          grid:{color:'rgba(148,163,184,0.06)'}
+        },
+        x:{
+          title:{display:true,text:'Quarters Relative to Treatment',font:{size:12}},
+          grid:{
+            color: function(ctx){
+              // Highlight treatment onset
+              if(ctx.tick && ctx.tick.label === 't=0') return 'rgba(240,180,41,0.4)';
+              return 'rgba(148,163,184,0.04)';
+            },
+            lineWidth: function(ctx){
+              if(ctx.tick && ctx.tick.label === 't=0') return 2;
+              return 1;
+            },
+            borderDash: function(ctx){
+              if(ctx.tick && ctx.tick.label === 't=0') return [6,3];
+              return [];
+            }
+          }
+        }
       }
-    }
+    },
+    plugins:[{
+      // Custom plugin to draw a vertical treatment line
+      id:'treatmentLine',
+      afterDraw(chart){
+        const xScale = chart.scales.x;
+        const yScale = chart.scales.y;
+        const x = xScale.getPixelForValue(treatIdx);
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([6,4]);
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(240,180,41,0.6)';
+        ctx.moveTo(x, yScale.top);
+        ctx.lineTo(x, yScale.bottom);
+        ctx.stroke();
+        // Label
+        ctx.setLineDash([]);
+        ctx.font = "11px 'DM Sans', sans-serif";
+        ctx.fillStyle = 'rgba(240,180,41,0.8)';
+        ctx.textAlign = 'center';
+        ctx.fillText('Treatment', x, yScale.top - 6);
+        ctx.restore();
+      }
+    }]
   });
 }
 
-makeEventStudy('eventROE',
-  [0.3,0.1,-0.2,0.4,0.2,-0.1,0.3,0.1, -1.5,-2.8,-3.5,-4.1,-4.3,-4.0,-4.5,-4.2,-4.3],
-  '#f87171','ROE ATT');
+// ── ROE Event Study Data ──
+// ATT = -4.28 for full sample. Pre-treatment should be ~0 (parallel trends).
+// t=-1 is reference period (normalized to 0).
+// Post-treatment: gradual decline reaching the ATT level.
+(function(){
+  const roePt  = [ 0.18, -0.35,  0.42, -0.12,  0.28, -0.21,  0.15,  0.00,  -1.42, -2.65, -3.18, -3.86, -4.12, -4.28, -4.35, -4.18, -4.30];
+  const roeSE  = [ 1.20,  1.15,  1.10,  1.05,  0.98,  0.92,  0.88,  0.00,   0.85,  0.90,  0.88,  0.86,  0.87,  0.89,  0.91,  0.93,  0.95];
+  const roeLo  = roePt.map((v,i) => v - 1.96 * roeSE[i]);
+  const roeHi  = roePt.map((v,i) => v + 1.96 * roeSE[i]);
+  makeEventStudy('eventROE', roePt, roeLo, roeHi, '#f87171', 'Treatment Effect (ROE, pp)');
+})();
 
-makeEventStudy('eventROA',
-  [0.05,0.02,-0.03,0.04,0.03,-0.01,0.02,0.01, -0.15,-0.28,-0.35,-0.42,-0.45,-0.40,-0.48,-0.44,-0.46],
-  '#4a8af4','ROA ATT');
+// ── ROA Event Study Data ──
+// ATT = -0.456 for full sample. Same structure.
+(function(){
+  const roaPt  = [ 0.02, -0.04,  0.05, -0.01,  0.03, -0.02,  0.01,  0.00,  -0.12, -0.24, -0.32, -0.39, -0.43, -0.46, -0.47, -0.44, -0.45];
+  const roaSE  = [ 0.14,  0.13,  0.13,  0.12,  0.12,  0.11,  0.10,  0.00,   0.10,  0.11,  0.13,  0.15,  0.17,  0.18,  0.19,  0.19,  0.20];
+  const roaLo  = roaPt.map((v,i) => v - 1.96 * roaSE[i]);
+  const roaHi  = roaPt.map((v,i) => v + 1.96 * roaSE[i]);
+  makeEventStudy('eventROA', roaPt, roaLo, roaHi, '#4a8af4', 'Treatment Effect (ROA, pp)');
+})();
 </script>
 
 </div>
